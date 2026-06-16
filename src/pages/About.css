@@ -1,0 +1,367 @@
+.about-page {
+  width: 100%;
+  background-color: var(--background);
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+/* ==========================================
+   LUXURY HERO BANNER
+========================================== */
+.about-hero-section {
+  position: relative;
+  height: 60vh;
+  min-height: 400px;
+  background: url("https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&q=80&w=1600") center/cover no-repeat;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 0 20px;
+}
+
+.about-hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.75));
+  z-index: 1;
+}
+
+.about-hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+}
+
+.hero-tag {
+  color: var(--secondary);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 15px;
+  display: block;
+}
+
+.about-hero-content h1 {
+  color: var(--white);
+  font-size: 3.5rem;
+  font-family: 'Playfair Display', serif;
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+
+.about-hero-content p {
+  color: #e2e8f0;
+  font-size: 1.15rem;
+  line-height: 1.8;
+  font-weight: 300;
+}
+
+/* ==========================================
+   STATS SECTION
+========================================== */
+.stats-section {
+  background: var(--primary);
+  border-bottom: 4px solid var(--secondary);
+  padding: 50px 8%;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 30px;
+  text-align: center;
+}
+
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stat-number {
+  color: var(--secondary);
+  font-size: 3rem;
+  font-weight: 700;
+  font-family: 'Poppins', sans-serif;
+}
+
+.stat-label {
+  color: #94a3b8;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+/* ==========================================
+   COMMON HEADER STYLING
+========================================== */
+.section-header {
+  text-align: center;
+  margin-bottom: 50px;
+  padding: 0 20px;
+}
+
+.section-header h2 {
+  font-size: 2.5rem;
+  color: var(--primary);
+  margin-bottom: 12px;
+}
+
+.header-divider {
+  width: 60px;
+  height: 3px;
+  background: var(--secondary);
+  margin: 0 auto 15px;
+}
+
+.section-sub {
+  color: #64748b;
+  font-size: 1.1rem;
+}
+
+/* ==========================================
+   CORE VALUES SECTION
+========================================== */
+.values-section {
+  padding: 80px 8%;
+  background: #f8fafc;
+}
+
+.values-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+}
+
+.value-card {
+  background: var(--white);
+  padding: 40px 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+  border: 1px solid #f1f5f9;
+}
+
+.value-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border-bottom: 3px solid var(--secondary);
+}
+
+.value-icon {
+  font-size: 32px;
+  display: inline-block;
+  margin-bottom: 20px;
+}
+
+.value-card h3 {
+  font-size: 1.3rem;
+  color: var(--primary);
+  margin-bottom: 12px;
+}
+
+.value-card p {
+  color: #475569;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* ==========================================
+   NARRATIVE / STORY SECTION
+========================================== */
+.story-narrative-section {
+  padding: 80px 8%;
+  background: var(--white);
+}
+
+.narrative-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 50px;
+  align-items: center;
+}
+
+.narrative-image-wrapper {
+  position: relative;
+}
+
+.narrative-img {
+  width: 100%;
+  height: 450px;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+}
+
+.narrative-badge {
+  position: absolute;
+  bottom: -20px;
+  right: -20px;
+  background: var(--secondary);
+  color: var(--primary);
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4);
+  font-weight: 700;
+  border: 4px solid var(--white);
+}
+
+.badge-years {
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+
+.badge-year {
+  font-size: 18px;
+}
+
+.narrative-text span {
+  color: var(--secondary);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.narrative-text h2 {
+  font-size: 2.5rem;
+  color: var(--primary);
+  margin-bottom: 20px;
+}
+
+.narrative-text p {
+  color: #334155;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  margin-bottom: 20px;
+}
+
+/* ==========================================
+   CREATIVE TEAM SECTION
+========================================== */
+.team-section {
+  padding: 80px 8%;
+  background: #f8fafc;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 40px;
+}
+
+.team-card {
+  background: var(--white);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+  border: 1px solid #f1f5f9;
+}
+
+.team-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+}
+
+.team-img-container {
+  height: 320px;
+  overflow: hidden;
+}
+
+.team-img-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.team-card:hover .team-img-container img {
+  transform: scale(1.06);
+}
+
+.team-info {
+  padding: 25px;
+  text-align: center;
+}
+
+.team-info h3 {
+  font-size: 1.25rem;
+  color: var(--primary);
+  margin-bottom: 6px;
+}
+
+.team-role {
+  color: var(--secondary);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* ==========================================
+   WORKSHOP GALLERY SECTION
+========================================== */
+.workshop-gallery-section {
+  padding: 80px 8%;
+  background: var(--white);
+}
+
+.workshop-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+}
+
+.workshop-gallery-grid img {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
+  border-radius: 8px;
+  transition: all 0.4s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.workshop-gallery-grid img:hover {
+  transform: scale(1.04);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+}
+
+/* ==========================================
+   RESPONSIVE LAYOUTS
+========================================== */
+@media (max-width: 768px) {
+  .about-hero-content h1 {
+    font-size: 2.5rem;
+  }
+  .section-header h2, .narrative-text h2 {
+    font-size: 2rem;
+  }
+  .narrative-grid {
+    gap: 30px;
+  }
+  .narrative-img {
+    height: 350px;
+  }
+  .narrative-badge {
+    right: 10px;
+    bottom: -15px;
+  }
+  .about-hero-section {
+    height: 50vh;
+  }
+  .values-section, .story-narrative-section, .team-section, .workshop-gallery-section {
+    padding: 60px 5%;
+  }
+}

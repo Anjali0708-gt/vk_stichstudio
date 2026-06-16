@@ -167,13 +167,7 @@ function Home() {
         </form>
       </section>
 
-      {/* Footer */}
-      <footer>
-        <h3>VK Stitch Studio</h3>
-        <p>Premium Tailoring & Custom Fashion</p>
-        <p>© 2026 All Rights Reserved</p>
-      </footer>
-
+      
     </div>
   );
 }
