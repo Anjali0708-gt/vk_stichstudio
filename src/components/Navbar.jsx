@@ -8,6 +8,8 @@ function Navbar() {
   const { cartCount } = useCart();
   const { currentUser, logout, isAuthenticated } = useAuth();
 
+        console.log("currentUser:", currentUser);
+        console.log("isAuthenticated:", isAuthenticated);  
   return (
     <nav className="navbar">
       <div className="logo">
@@ -53,11 +55,13 @@ function Navbar() {
             <Link to="/login" className="user-name-link" title="View Profile">
               <FaUser />
               <span className="user-display-name">{currentUser.name.split(' ')[0]}</span>
+
             </Link>
             <button onClick={logout} className="logout-btn" title="Log Out">
               <FaSignOutAlt />
             </button>
           </div>
+          
         ) : (
           <Link to="/login" className="login-link" title="Login / Register">
             <FaUser />

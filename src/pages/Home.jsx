@@ -1,173 +1,221 @@
 import "./Home.css";
+import { useNavigate } from "react-router-dom";
+import {
+  FaTshirt,
+  FaRulerCombined,
+  FaTruck,
+  FaCut,
+  FaUserTie,
+  FaCalendarCheck,
+  FaStar,
+  FaPhoneAlt,
+} from "react-icons/fa";
+
+const services = [
+  {
+    name: "Custom Suits",
+    image: "https://images.unsplash.com/photo-1593030761757-71fae45fa0e7",
+  },
+  {
+    name: "Wedding Wear",
+    image: "https://images.unsplash.com/photo-1520975916090-3105956dac38",
+  },
+  {
+    name: "Blazers",
+    image: "https://images.unsplash.com/photo-1617127365659-c47fa864d8bc",
+  },
+  {
+    name: "Alterations",
+    image: "https://images.unsplash.com/photo-1521334884684-d80222895322",
+  },
+  {
+    name: "Business Wear",
+    image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518",
+  },
+  {
+    name: "Traditional Wear",
+    image: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c",
+  },
+];
+
+const features = [
+  {
+    title: "Premium Fabrics",
+    desc: "Only the finest materials for lasting quality.",
+    icon: <FaTshirt />,
+  },
+  {
+    title: "Perfect Fit",
+    desc: "Precise measurements for unmatched comfort.",
+    icon: <FaRulerCombined />,
+  },
+  {
+    title: "Expert Tailors",
+    desc: "Years of craftsmanship in every stitch.",
+    icon: <FaCut />,
+  },
+  {
+    title: "Fast Delivery",
+    desc: "On-time delivery guaranteed.",
+    icon: <FaTruck />,
+  },
+];
+
+const steps = [
+  { title: "Book Consultation", icon: <FaCalendarCheck /> },
+  { title: "Take Measurements" },
+  { title: "Choose Fabric" },
+  { title: "Tailoring Process" },
+  { title: "Delivery" },
+];
+
+const reviews = [
+  {
+    name: "Rahul Sharma",
+    text: "Best fitting suit I've ever owned.",
+    stars: 5,
+  },
+  {
+    name: "Aman Verma",
+    text: "Amazing quality and service.",
+    stars: 5,
+  },
+  {
+    name: "Vikram Singh",
+    text: "Perfect wedding suit. Highly recommended.",
+    stars: 5,
+  },
+];
+
+const galleryImages = [
+  "https://images.unsplash.com/photo-1593030761757-71fae45fa0e7",
+  "https://images.unsplash.com/photo-1617127365659-c47fa864d8bc",
+  "https://images.unsplash.com/photo-1521572267360-ee0c2909d518",
+];
 
 function Home() {
-  return (
-    <div>
+  const navigate = useNavigate();
 
-      {/* Hero Section */}
+  return (
+    <div className="home">
+
+      {/* HERO */}
       <section className="hero">
-        <div className="hero-content">
+        <div className="hero-overlay">
           <h1>Crafted for Your Story</h1>
           <p>
-            Premium custom tailoring for weddings, business wear,
-            and special occasions.
+            Premium tailoring for weddings, business & special occasions
           </p>
 
           <div className="hero-buttons">
-            <button>Book Appointment</button>
-            <button className="secondary">Explore Collection</button>
+            <button
+              className="primary"
+              onClick={() => navigate("/bookappointment")}
+            >
+              <FaCalendarCheck /> Book Appointment
+            </button>
+
+            <button className="secondary" onClick={() => navigate("/gallery")}>
+              Explore Collection
+            </button>
           </div>
         </div>
       </section>
 
-      {/* Why Choose Us */}
+      {/* FEATURES */}
       <section className="section">
         <h2>Why Choose Us</h2>
 
         <div className="card-container">
-          <div className="card">
-            <h3>Premium Fabrics</h3>
-            <p>Only the finest materials for lasting quality.</p>
-          </div>
-
-          <div className="card">
-            <h3>Perfect Fit</h3>
-            <p>Precise measurements for unmatched comfort.</p>
-          </div>
-
-          <div className="card">
-            <h3>Expert Tailors</h3>
-            <p>Years of craftsmanship in every stitch.</p>
-          </div>
-
-          <div className="card">
-            <h3>Fast Delivery</h3>
-            <p>Get your outfit delivered on time.</p>
-          </div>
+          {features.map((f, i) => (
+            <div className="card" key={i}>
+              <div className="icon">{f.icon}</div>
+              <h3>{f.title}</h3>
+              <p>{f.desc}</p>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Services */}
+      {/* SERVICES */}
       <section className="section gray">
         <h2>Our Services</h2>
 
-        <div className="card-container">
-          <div className="card">Custom Suits</div>
-          <div className="card">Wedding Wear</div>
-          <div className="card">Blazers</div>
-          <div className="card">Alterations</div>
-          <div className="card">Business Wear</div>
-          <div className="card">Traditional Wear</div>
+        <div className="service-grid">
+          {services.map((item, i) => (
+            <div className="service-card" key={i}>
+              <div className="service-image">
+                <img src={item.image} alt={item.name} />
+              </div>
+
+              <div className="service-overlay">
+                <h3>{item.name}</h3>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Collection */}
+      {/* GALLERY */}
       <section className="section">
         <h2>Designer Collection</h2>
 
         <div className="gallery">
-          <img
-            src="https://images.unsplash.com/photo-1593030761757-71fae45fa0e7"
-            alt=""
-          />
-          <img
-            src="https://images.unsplash.com/photo-1617127365659-c47fa864d8bc"
-            alt=""
-          />
-          <img
-            src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518"
-            alt=""
-          />
+          {galleryImages.map((img, i) => (
+            <img key={i} src={img} alt="collection" />
+          ))}
         </div>
       </section>
 
-      {/* How It Works */}
+      {/* STEPS */}
       <section className="section gray">
         <h2>How It Works</h2>
 
         <div className="steps">
-          <div className="step">1. Book Consultation</div>
-          <div className="step">2. Take Measurements</div>
-          <div className="step">3. Choose Fabric</div>
-          <div className="step">4. Tailoring Process</div>
-          <div className="step">5. Delivery</div>
+          {steps.map((s, i) => (
+            <div className="step" key={i}>
+              <span className="step-number">{i + 1}</span>
+              <span>{s.title}</span>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Measurement */}
+      {/* REVIEWS */}
       <section className="section">
-        <h2>Measurement Process</h2>
-
-        <p className="center">
-          Accurate measurements ensure a perfect fit every time.
-        </p>
-
-        <div className="measurements">
-          <span>Neck</span>
-          <span>Chest</span>
-          <span>Waist</span>
-          <span>Shoulder</span>
-          <span>Sleeve</span>
-          <span>Hip</span>
-        </div>
-      </section>
-
-      {/* Reviews */}
-      <section className="section gray">
         <h2>Customer Reviews</h2>
 
         <div className="card-container">
-          <div className="card">
-            ⭐⭐⭐⭐⭐
-            <p>Best fitting suit I've ever owned.</p>
-          </div>
+          {reviews.map((r, i) => (
+            <div className="card review-card" key={i}>
+              <div className="stars">
+                {[...Array(r.stars)].map((_, index) => (
+                  <FaStar key={index} />
+                ))}
+              </div>
 
-          <div className="card">
-            ⭐⭐⭐⭐⭐
-            <p>Amazing quality and service.</p>
-          </div>
-
-          <div className="card">
-            ⭐⭐⭐⭐⭐
-            <p>Perfect wedding suit. Highly recommended.</p>
-          </div>
+              <p>{r.text}</p>
+              <h4>- {r.name}</h4>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Gallery */}
-      <section className="section">
-        <h2>Gallery</h2>
-
-        <div className="gallery">
-          <img
-            src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f"
-            alt=""
-          />
-          <img
-            src="https://images.unsplash.com/photo-1496747611176-843222e1e57c"
-            alt=""
-          />
-          <img
-            src="https://images.unsplash.com/photo-1483985988355-763728e1935b"
-            alt=""
-          />
-        </div>
-      </section>
-
-      {/* Contact */}
+      {/* CONTACT */}
       <section className="section gray">
         <h2>Contact Us</h2>
 
         <form className="contact-form">
-          <input type="text" placeholder="Name" />
-          <input type="email" placeholder="Email" />
-          <textarea placeholder="Message"></textarea>
+          <input type="text" placeholder="Your Name" />
+          <input type="email" placeholder="Your Email" />
+          <textarea placeholder="Your Message"></textarea>
 
-          <button type="submit">Send Message</button>
+          <button type="submit">
+            <FaPhoneAlt /> Send Message
+          </button>
         </form>
       </section>
 
-      
     </div>
   );
 }

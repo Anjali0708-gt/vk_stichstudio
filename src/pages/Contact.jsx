@@ -43,7 +43,7 @@ function Contact() {
     {
       icon: <FaMapMarkerAlt />,
       title: "Our Studio",
-      detail: "Karimpur, West Bengal, India",
+      detail: "PremPura Phagwara, India",
       desc: "Visit us for fabric viewings and fittings."
     },
     {

@@ -1,0 +1,42 @@
+.quick-actions {
+  background: #ffffff;
+  padding: 20px;
+  margin-top: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.quick-actions h2 {
+  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: 600;
+  color: #333;
+}
+
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+}
+
+.action-btn {
+  border: none;
+  padding: 18px;
+  border-radius: 10px;
+  background: #f5f7fa;
+  color: #333;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+  background: #2563eb;
+  color: white;
+  transform: translateY(-3px);
+}
+
+.action-btn:active {
+  transform: scale(0.98);
+}

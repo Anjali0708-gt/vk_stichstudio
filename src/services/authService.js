@@ -5,26 +5,37 @@ const DELAY = 800; // Simulated network delay in ms
 
 // Load users from localStorage or initialize with a default user
 const getStoredUsers = () => {
-  const users = localStorage.getItem('vk_users');
-  return users ? JSON.parse(users) : [
-    {
-      id: '1',
-      name: 'Anjali Sharma',
-      email: 'user@example.com',
-      password: 'password123',
-      bookings: [
-        {
-          id: 'B-1024',
-          service: 'Wedding Wear Fitting',
-          date: '2026-06-25',
-          time: '14:30',
-          status: 'Confirmed'
-        }
-      ]
-    }
-  ];
-};
+  const users = localStorage.getItem("vk_users");
 
+  return users
+    ? JSON.parse(users)
+    : [
+        {
+          id: "1",
+          name: "Admin User",
+          email: "admin@gmail.com",
+          password: "12345",
+          role: "admin",
+          bookings: [],
+        },
+        {
+          id: "2",
+          name: "Rahul Sharma",
+          email: "customer@gmail.com",
+          password: "12345",
+          role: "customer",
+          bookings: [
+            {
+              id: "B-1024",
+              service: "Wedding Wear Fitting",
+              date: "2026-06-25",
+              time: "14:30",
+              status: "Confirmed",
+            },
+          ],
+        },
+      ];
+};
 const saveUsers = (users) => {
   localStorage.setItem('vk_users', JSON.stringify(users));
 };
@@ -42,7 +53,7 @@ export const authService = {
         }
         
         if (user.password !== password) {
-          reject(new Error('Invalid email or password.'));
+          reject(new Error('Invalid   password.'));
           return;
         }
         
@@ -64,15 +75,14 @@ export const authService = {
           reject(new Error('Email address is already registered.'));
           return;
         }
-
-        const newUser = {
-          id: Math.random().toString(36).substring(2, 9),
-          name: userData.name,
-          email: userData.email,
-          password: userData.password,
-          bookings: []
-        };
-
+const newUser = {
+  id: Math.random().toString(36).substring(2, 9),
+  name: userData.name,
+  email: userData.email,
+  password: userData.password,
+  role: "customer",  // ✅ ADD THIS
+  bookings: []
+};
         users.push(newUser);
         saveUsers(users);
 
