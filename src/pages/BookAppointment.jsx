@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { bookingService } from '../services/bookingService';
+import { bookingService } from '../Api/OrderApi';
 import { useAuth } from '../context/AuthContext';
 import './BookAppointment.css';
 import { FaUser, FaEnvelope, FaPhone, FaRuler, FaClock, FaCheckCircle } from 'react-icons/fa';

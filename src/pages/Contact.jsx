@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { contactService } from '../services/contactService';
+
 import './Contact.css';
 import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt, FaClock, FaPaperPlane } from 'react-icons/fa';
 
@@ -26,17 +26,17 @@ function Contact() {
     setLoading(true);
     setFeedback({ status: '', message: '' });
 
-    try {
-      const result = await contactService.submitContactForm(formData);
-      if (result.success) {
-        setFeedback({ status: 'success', message: result.message });
-        setFormData({ name: '', email: '', subject: '', message: '' });
-      }
-    } catch (error) {
-      setFeedback({ status: 'error', message: error.message || 'Failed to send message.' });
-    } finally {
-      setLoading(false);
-    }
+    // try {
+    //   const result = await contactService.submitContactForm(formData);
+    //   if (result.success) {
+    //     setFeedback({ status: 'success', message: result.message });
+    //     setFormData({ name: '', email: '', subject: '', message: '' });
+    //   }
+    // } catch (error) {
+    //   setFeedback({ status: 'error', message: error.message || 'Failed to send message.' });
+    // } finally {
+    //   setLoading(false);
+    // }
   };
 
   const contactDetails = [

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../layouts/AdminLayout';
-import { dashboardService } from '../services/dashboardService';
+import { getCustomers } from '../Api/Authapi';
 import { FaSearch } from 'react-icons/fa';
 
 const AVATAR_COLORS = ['dash-avatar-purple', 'dash-avatar-green', 'dash-avatar-blue', 'dash-avatar-amber', 'dash-avatar-red'];
@@ -14,7 +14,7 @@ export default function Customers() {
     const loadCustomers = async () => {
       setLoading(true);
       try {
-        const data = await dashboardService.getCustomers(searchQuery);
+        const data = await getCustomers(searchQuery);
         setCustomers(data);
       } catch (err) {
         console.error('Failed to load customers:', err);

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { productService } from '../services/productService';
+import { getProducts } from "../Api/ProductApi";
 import { useCart } from '../context/CartContext';
 import './Gallery.css';
 import { FaStar, FaShoppingCart, FaCheck } from 'react-icons/fa';
@@ -16,23 +16,33 @@ function Gallery() {
   const categories = ['All', 'Men', 'Women', 'Traditional'];
 
   useEffect(() => {
-    const fetchProducts = async () => {
+  const fetchProducts = async () => {
+    try {
       setLoading(true);
-      const data = await productService.getProducts(category);
-      setProducts(data);
-      
-      // Initialize sizes for products
-      const initialSizes = {};
-      data.forEach(p => {
-        initialSizes[p.id] = p.sizes[0]; // default to first size
-      });
-      setSelectedSizes(prev => ({ ...prev, ...initialSizes }));
-      
-      setLoading(false);
-    };
 
-    fetchProducts();
-  }, [category]);
+      const response = await getProducts();
+      const productList = response.data.products; // ✅ unwrap here
+
+      // Normalize _id -> id so the rest of the component can rely on product.id
+      const normalized = productList.map((p) => ({ ...p, id: p._id }));
+
+      setProducts(normalized);
+
+      const initialSizes = {};
+      normalized.forEach((p) => {
+        initialSizes[p.id] = p.sizes?.[0] || "Standard";
+      });
+
+      setSelectedSizes(initialSizes);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchProducts();
+}, []);
 
   const handleSizeChange = (productId, size) => {
     setSelectedSizes(prev => ({
@@ -122,7 +132,7 @@ function Gallery() {
                     </div>
 
                     {/* Sizing Selector */}
-                    <div className="size-selector-container">
+                    {/* <div className="size-selector-container">
                       <label htmlFor={`size-${product.id}`}>Select Size:</label>
                       <select
                         id={`size-${product.id}`}
@@ -134,7 +144,7 @@ function Gallery() {
                           <option key={sz} value={sz}>{sz}</option>
                         ))}
                       </select>
-                    </div>
+                    </div> */}
 
                     {/* Action Button */}
                     <button

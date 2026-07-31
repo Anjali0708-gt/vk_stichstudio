@@ -54,9 +54,10 @@ function Navbar() {
           <div className="user-profile-menu">
             <Link to="/login" className="user-name-link" title="View Profile">
               <FaUser />
-              <span className="user-display-name">{currentUser.name.split(' ')[0]}</span>
-
-            </Link>
+            <span className="user-display-name">
+  {currentUser?.name ? currentUser.name.split(' ')[0] : 'Account'}
+</span>     
+       </Link>
             <button onClick={logout} className="logout-btn" title="Log Out">
               <FaSignOutAlt />
             </button>

@@ -86,19 +86,27 @@ body {
   position: relative;
   height: 100vh;
   min-height: 600px;
+
   background:
-    linear-gradient(to bottom, rgba(20, 16, 12, 0.45) 0%, rgba(20, 16, 12, 0.72) 100%),
-    url('https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?w=1600&q=80') center/cover no-repeat;
+    linear-gradient(to right,
+      rgba(0,0,0,0.2) 0%,
+      rgba(0,0,0,0.3) 45%,
+      rgba(0,0,0,0.75) 100%
+    ),
+    url("/images/background hero img.png") center center/cover no-repeat;
+
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end; /* Text moves to the right */
+  padding-right: 8%;
 }
-
 .hero-overlay {
-  text-align: center;
+  width: 45%;
+  max-width: 650px;
+  margin-left: auto;   /* Pushes text to the right */
+  text-align: left;    /* Text starts from the left */
   color: #fff;
   padding: 24px;
-  max-width: 720px;
 }
 
 .hero-overlay h1 {
@@ -121,7 +129,7 @@ body {
 .hero-buttons {
   display: flex;
   gap: 16px;
-  justify-content: center;
+  justify-content: flex-start;  /* Instead of center */
   flex-wrap: wrap;
 }
 

@@ -22,15 +22,15 @@ import { Routes, Route } from 'react-router-dom';
 // // ...............................................
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import Dashboard from './pages/Dashboard';
+// import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
-import About from './pages/About';
-import Services from './pages/Services';
+// import About from './pages/About';
+// import Services from './pages/Services';
 import Gallery from './pages/Gallery';
-import Contact from './pages/Contact';
+// import Contact from './pages/Contact';
 import Login from './pages/Login';
-import Addtocart from './pages/Addtocart';
-import BookAppointment from './pages/BookAppointment';
+// import Addtocart from './pages/Addtocart';
+// import BookAppointment from './pages/BookAppointment';
 
 function App() {
   return (
@@ -39,17 +39,17 @@ function App() {
 
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/service" element={<Services />} />
-        <Route path="/contact" element={<Contact />} />
+        {/* <Route path="/about" element={<About />} /> */}
+        {/* <Route path="/service" element={<Services />} /> */}
+        {/* <Route path="/contact" element={<Contact />} /> */}
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/cart" element={<Addtocart />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route
+        {/* <Route path="/cart" element={<Addtocart />} /> */}
+        {/* <Route path="/dashboard" element={<Dashboard />} /> */}
+        {/* <Route
           path="/bookappointment"
           element={<BookAppointment />}
-        />
+        /> */}
       </Routes>
 
       <Footer />

@@ -122,21 +122,7 @@ function Home() {
         </div>
       </section>
 
-      {/* FEATURES */}
-      <section className="section">
-        <h2>Why Choose Us</h2>
-
-        <div className="card-container">
-          {features.map((f, i) => (
-            <div className="card" key={i}>
-              <div className="icon">{f.icon}</div>
-              <h3>{f.title}</h3>
-              <p>{f.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
+      
       {/* SERVICES */}
       <section className="section gray">
         <h2>Our Services</h2>
@@ -166,8 +152,8 @@ function Home() {
           ))}
         </div>
       </section>
-
-      {/* STEPS */}
+{/* 
+      
       <section className="section gray">
         <h2>How It Works</h2>
 
@@ -179,7 +165,23 @@ function Home() {
             </div>
           ))}
         </div>
+      </section> */}
+       
+       {/* FEATURES */}
+      <section className="section">
+        <h2>Why Choose Us</h2>
+
+        <div className="card-container">
+          {features.map((f, i) => (
+            <div className="card" key={i}>
+              <div className="icon">{f.icon}</div>
+              <h3>{f.title}</h3>
+              <p>{f.desc}</p>
+            </div>
+          ))}
+        </div>
       </section>
+
 
       {/* REVIEWS */}
       <section className="section">

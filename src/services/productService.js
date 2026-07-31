@@ -1,100 +1,184 @@
-// Mock Product Service
-// Exposes data for VK Stich Studio's premium collections. Easily customizable with real backend queries.
+import { useState, useEffect } from 'react';
+import { productService } from '../services/productService';
+import { useCart } from '../context/CartContext';
+import './Gallery.css';
+import { FaStar, FaShoppingCart, FaCheck } from 'react-icons/fa';
 
-const DELAY = 400; // Fast simulation for local gallery browsing
+function Gallery() {
+  const [products, setProducts] = useState([]);
+  const [category, setCategory] = useState('All');
+  const [loading, setLoading] = useState(true);
+  const [selectedSizes, setSelectedSizes] = useState({}); // productId -> selectedSize
+  const [addedItems, setAddedItems] = useState({}); // productId -> boolean (for feedback)
 
-const PRODUCTS = [
-  {
-    id: 'p1',
-    name: 'Classic Three-Piece Royal Suit',
-    price: 18999,
-    category: 'Men',
-    image: 'https://images.unsplash.com/photo-1593030761757-71fae45fa0e7',
-    description: 'Bespoke tailoring at its finest. Made of premium Italian wool with a custom lining, structured shoulders, and flat-front trousers.',
-    rating: 4.9,
-    reviews: 24,
-    sizes: ['Standard M', 'Standard L', 'Standard XL', 'Custom Fit (Requires Booking)']
-  },
-  {
-    id: 'p2',
-    name: 'Elegant Crimson Bridal Lehenga',
-    price: 45000,
-    category: 'Traditional',
-    image: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=800',
-    description: 'Detailed hand embroidery on raw silk, complete with custom designer blouse, silk dupatta, and adjustable waist tie.',
-    rating: 5.0,
-    reviews: 12,
-    sizes: ['Standard S', 'Standard M', 'Custom Fit (Requires Booking)']
-  },
-  {
-    id: 'p3',
-    name: 'Classic Velvet Blazer',
-    price: 12500,
-    category: 'Men',
-    image: 'https://images.unsplash.com/photo-1617127365659-c47fa864d8bc',
-    description: 'Rich velvet double-breasted blazer with satin peak lapels. Perfect for formal evenings and receptions.',
-    rating: 4.8,
-    reviews: 31,
-    sizes: ['Standard S', 'Standard M', 'Standard L', 'Custom Fit (Requires Booking)']
-  },
-  {
-    id: 'p4',
-    name: 'Ivory Designer Wedding Gown',
-    price: 38000,
-    category: 'Women',
-    image: 'https://images.unsplash.com/photo-1525258946800-98cfd641d0de',
-    description: 'Exquisite lace detail bodice with a flowing satin skirt and long train. Made to order with custom fitting consultations.',
-    rating: 4.9,
-    reviews: 18,
-    sizes: ['Standard S', 'Standard M', 'Standard L', 'Custom Fit (Requires Booking)']
-  },
-  {
-    id: 'p5',
-    name: 'Handcrafted Sherwani with Zardozi Work',
-    price: 28999,
-    category: 'Traditional',
-    image: 'https://images.unsplash.com/photo-1597983073492-bc24018b47f8?auto=format&fit=crop&q=80&w=800',
-    description: 'Premium gold-tinted silk Sherwani detailed with heavy Zardozi embroidery, matched with silk churidar pants.',
-    rating: 4.7,
-    reviews: 15,
-    sizes: ['Standard M', 'Standard L', 'Custom Fit (Requires Booking)']
-  },
-  {
-    id: 'p6',
-    name: 'Modern Tailored Corporate Jumpsuit',
-    price: 7999,
-    category: 'Women',
-    image: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c',
-    description: 'Crepe fabric tapered jumpsuit with mock collar, structural pleating, and customizable belted waist.',
-    rating: 4.6,
-    reviews: 22,
-    sizes: ['Standard S', 'Standard M', 'Standard L', 'Custom Fit (Requires Booking)']
-  }
-];
+  const { addToCart } = useCart();
 
-export const productService = {
-  getProducts: async (category = 'All') => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        if (category === 'All') {
-          resolve(PRODUCTS);
-        } else {
-          resolve(PRODUCTS.filter(p => p.category.toLowerCase() === category.toLowerCase()));
-        }
-      }, DELAY);
-    });
-  },
+  const categories = ['All', 'Men', 'Women', 'Traditional'];
 
-  getProductById: async (id) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const product = PRODUCTS.find(p => p.id === id);
-        if (product) {
-          resolve(product);
-        } else {
-          reject(new Error('Product not found'));
-        }
-      }, DELAY);
-    });
-  }
-};
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+
+        const data = await productService.getAll();
+
+        // Normalize _id -> id so the rest of the component can rely on product.id
+        const normalized = data.map((p) => ({ ...p, id: p._id || p.id }));
+
+        setProducts(normalized);
+
+        const initialSizes = {};
+        normalized.forEach((p) => {
+          initialSizes[p.id] = p.sizes?.[0] || 'Standard';
+        });
+
+        setSelectedSizes(initialSizes);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const handleSizeChange = (productId, size) => {
+    setSelectedSizes((prev) => ({
+      ...prev,
+      [productId]: size
+    }));
+  };
+
+  const handleAddToCart = (product) => {
+    const size = selectedSizes[product.id] || 'Standard M';
+    addToCart(product, size);
+
+    // Show temporary success feedback
+    setAddedItems((prev) => ({ ...prev, [product.id]: true }));
+    setTimeout(() => {
+      setAddedItems((prev) => ({ ...prev, [product.id]: false }));
+    }, 1800);
+  };
+
+  // Apply category filter
+  const filteredProducts =
+    category === 'All'
+      ? products
+      : products.filter((p) => p.category === category);
+
+  return (
+    <div className="gallery-page">
+      {/* Page Header */}
+      <section className="gallery-hero">
+        <div className="gallery-hero-overlay"></div>
+        <div className="gallery-hero-content">
+          <h1>Designer Collection</h1>
+          <p>
+            Explore our curated selection of bespoke and ready-to-fit designer wear. Add garments to your cart or customize sizes through booking.
+          </p>
+        </div>
+      </section>
+
+      {/* Categories & Filter Bar */}
+      <section className="filter-section">
+        <div className="category-tabs">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              className={`category-btn ${category === cat ? 'active' : ''}`}
+              onClick={() => setCategory(cat)}
+            >
+              {cat} Collection
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* Products Grid */}
+      <section className="products-section">
+        {loading ? (
+          <div className="loading-spinner">
+            <div className="spinner"></div>
+            <p>Loading luxury collections...</p>
+          </div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="no-products">
+            <p>No designs available in this category currently.</p>
+          </div>
+        ) : (
+          <div className="products-grid">
+            {filteredProducts.map((product) => {
+              const currentSize = selectedSizes[product.id] || product.sizes?.[0];
+              const isAdded = addedItems[product.id];
+
+              return (
+                <div className="product-card" key={product.id}>
+                  <div className="product-img-wrapper">
+                    <img src={product.image} alt={product.name} className="product-image" />
+                    <span className="product-category-badge">{product.category}</span>
+                  </div>
+
+                  <div className="product-info">
+                    <div className="product-rating">
+                      <span className="stars">
+                        {[...Array(5)].map((_, i) => (
+                          <FaStar
+                            key={i}
+                            className={i < Math.floor(product.rating) ? 'star-filled' : 'star-empty'}
+                          />
+                        ))}
+                      </span>
+                      <span className="reviews-count">({product.reviews})</span>
+                    </div>
+
+                    <h3 className="product-title">{product.name}</h3>
+                    <p className="product-description">{product.description}</p>
+
+                    <div className="product-price">
+                      ₹{product.price.toLocaleString('en-IN')}
+                    </div>
+
+                    {/* Sizing Selector */}
+                    <div className="size-selector-container">
+                      <label htmlFor={`size-${product.id}`}>Select Size:</label>
+                      <select
+                        id={`size-${product.id}`}
+                        value={currentSize}
+                        onChange={(e) => handleSizeChange(product.id, e.target.value)}
+                        className="size-select"
+                      >
+                        {product.sizes?.map((sz) => (
+                          <option key={sz} value={sz}>{sz}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Action Button */}
+                    <button
+                      onClick={() => handleAddToCart(product)}
+                      className={`add-to-cart-btn ${isAdded ? 'success' : ''}`}
+                      disabled={isAdded}
+                    >
+                      {isAdded ? (
+                        <>
+                          <FaCheck /> Added to Cart
+                        </>
+                      ) : (
+                        <>
+                          <FaShoppingCart /> Add to Cart
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
+
+export default Gallery;
