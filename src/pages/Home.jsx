@@ -1,5 +1,9 @@
 import "./Home.css";
 import { useNavigate } from "react-router-dom";
+import {getServices} from '../Api/Serviceapi'
+import { getProducts } from "../Api/ProductApi";
+
+import { useState,useEffect } from "react";
 import {
   FaTshirt,
   FaRulerCombined,
@@ -11,32 +15,9 @@ import {
   FaPhoneAlt,
 } from "react-icons/fa";
 
-const services = [
-  {
-    name: "Custom Suits",
-    image: "https://images.unsplash.com/photo-1593030761757-71fae45fa0e7",
-  },
-  {
-    name: "Wedding Wear",
-    image: "https://images.unsplash.com/photo-1520975916090-3105956dac38",
-  },
-  {
-    name: "Blazers",
-    image: "https://images.unsplash.com/photo-1617127365659-c47fa864d8bc",
-  },
-  {
-    name: "Alterations",
-    image: "https://images.unsplash.com/photo-1521334884684-d80222895322",
-  },
-  {
-    name: "Business Wear",
-    image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518",
-  },
-  {
-    name: "Traditional Wear",
-    image: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c",
-  },
-];
+
+
+
 
 const features = [
   {
@@ -95,6 +76,39 @@ const galleryImages = [
 
 function Home() {
   const navigate = useNavigate();
+  const [services, setServices] = useState([]);
+  const [galleryImages,setgalleryImages]=useState([])
+
+
+    useEffect(() => {
+    fetchServices();
+    fetchgalleryImages();
+  }, []);
+
+  const fetchServices = async () => {
+    try {
+      const res = await getServices();
+
+      setServices(res.data.services);
+        }
+         catch (e) {
+      console.log(e);
+    }
+  };
+
+  
+  const fetchgalleryImages = async () => {
+    try {
+      const res = await getProducts();
+       console.log(res.data)
+      setgalleryImages(res.data.products);
+        }
+         catch (e) {
+      console.log(e);
+    }
+  };
+
+
 
   return (
     <div className="home">
@@ -147,8 +161,12 @@ function Home() {
         <h2>Designer Collection</h2>
 
         <div className="gallery">
-          {galleryImages.map((img, i) => (
-            <img key={i} src={img} alt="collection" />
+          {galleryImages.map((item, i) => (
+           <img
+      key={item._id}
+      src={item.image}
+      alt={item.name}
+    />
           ))}
         </div>
       </section>

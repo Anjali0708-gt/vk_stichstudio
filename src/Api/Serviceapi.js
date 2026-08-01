@@ -1,13 +1,13 @@
 import API from "./axios";
 
 export const getServices = () =>
-  API.get("/services");
+  API.get("/service");
 
 export const addService = (data) =>
-  API.post("/services", data);
+  API.post("/service", data);
 
 export const updateService = (id, data) =>
-  API.put(`/services/${id}`, data);
+  API.put(`/service/${id}`, data);
 
 export const deleteService = (id) =>
-  API.delete(`/services/${id}`);
+  API.delete(`/service/${id}`);

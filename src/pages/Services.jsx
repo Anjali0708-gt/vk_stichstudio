@@ -1,4 +1,7 @@
 import "./Services.css";
+
+import {getServices} from  '../Api/Serviceapi'
+import { getProducts } from "../Api/ProductApi";
 import { useNavigate } from "react-router-dom";
 import {
   FaUserTie,
@@ -8,72 +11,24 @@ import {
   FaSchool,
   FaRulerCombined,
 } from "react-icons/fa";
+import { useState } from "react";
 
 function Services() {
+  const [loading,setLoading]=useState(false);
   const navigate = useNavigate();
 
-  const services = [
+  const services = async()=>
+  {
+    try
     {
-      title: "Custom Tailoring",
-      icon: <FaUserTie />,
-      image:
-        "https://images.unsplash.com/photo-1512436991641-6745cdb1723f",
-      description:
-        "Bespoke suits and garments crafted according to your body measurements and personal style.",
-      price: "₹2,999",
-      delivery: "5-7 Days",
-    },
+      setLoading(true)
+      const service=await getServices();
+    }
+    catch(e)
     {
-      title: "Wedding & Bridal Wear",
-      icon: <FaRing />,
-      image:
-        "https://images.unsplash.com/photo-1525258946800-98cfd641d0de",
-      description:
-        "Luxury bridal dresses, sherwanis, lehengas, and wedding outfits designed to perfection.",
-      price: "₹7,999",
-      delivery: "10-15 Days",
-    },
-    {
-      title: "Formal Suits & Blazers",
-      icon: <FaUserTie />,
-      image:
-        "https://images.unsplash.com/photo-1593032465171-8f7b9f36b66f",
-      description:
-        "Premium business suits and blazers tailored for corporate professionals.",
-      price: "₹4,999",
-      delivery: "7 Days",
-    },
-    {
-      title: "Women's Designer Wear",
-      icon: <FaTshirt />,
-      image:
-        "https://images.unsplash.com/photo-1496747611176-843222e1e57c",
-      description:
-        "Custom gowns, dresses, ethnic wear, and fashion garments designed uniquely for you.",
-      price: "₹3,499",
-      delivery: "5-10 Days",
-    },
-    {
-      title: "Alteration & Repair",
-      icon: <FaCut />,
-      image:
-        "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab",
-      description:
-        "Professional resizing, repairs, hemming, zipper replacement, and fitting adjustments.",
-      price: "₹299",
-      delivery: "1-2 Days",
-    },
-    {
-      title: "Uniform Stitching",
-      icon: <FaSchool />,
-      image:
-        "https://images.unsplash.com/photo-1507679799987-c73779587ccf",
-      description:
-        "Customized uniforms for schools, colleges, hospitals, offices, and organizations.",
-      price: "₹499",
-      delivery: "Bulk Orders Available",
-    },
-  ];
+      console.log("error in service fecthing",e.message)
+    }
+  }
 
   return (
     <div className="services-page">
