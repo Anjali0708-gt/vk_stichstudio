@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 function Navbar() {
   const { cartCount } = useCart();
   const { currentUser, logout, isAuthenticated } = useAuth();
+  
 
         console.log("currentUser:", currentUser);
         console.log("isAuthenticated:", isAuthenticated);  

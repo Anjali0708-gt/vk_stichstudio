@@ -11,8 +11,7 @@ function Gallery() {
   const [selectedSizes, setSelectedSizes] = useState({}); // productId -> selectedSize
   const [addedItems, setAddedItems] = useState({}); // productId -> boolean (for feedack)
   
-  const { addToCart } = useCart();
-
+  const { addToCart } = useCart(); 
   const categories = ['All', 'Men', 'Women', 'Traditional'];
 
   useEffect(() => {
