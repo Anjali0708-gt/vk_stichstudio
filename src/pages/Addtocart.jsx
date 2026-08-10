@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getCart, increase, decrease, remove, clearCart } from "../redux/slices/cartSlice";
+import { getCart, increase, decrease, remove, clearCart } from "../redux/cartSlice";
 
 import { Link, useNavigate } from "react-router-dom";
 import "./Addtocart.css";
@@ -138,55 +138,67 @@ function Addtocart() {
               {/* Cart Items List */}
               <div className="cart-items-column">
                 {cartItems.map((item) => (
-                  <div
-                    className="cart-item-card"
-                    key={`${item._id}-${item.selectedSize}`}
-                  >
-                    <div className="cart-item-img-container">
-                      <img src={item.image} alt={item.name} />
-                    </div>
+  <div
+    className="cart-item-card"
+    key={item.product._id}
+  >
+    <div className="cart-item-img-container">
+      <img
+        src={item.product.image}
+        alt={item.product.name}
+      />
+    </div>
 
-                    <div className="cart-item-details">
-                      <h3 className="item-name">{item.name}</h3>
-                      <p className="item-size-info">
-                        Size: <span>{item.selectedSize}</span>
-                      </p>
-                      <span className="item-unit-price">
-                        ₹{item.price.toLocaleString("en-IN")}
-                      </span>
-                    </div>
+    <div className="cart-item-details">
+      <h3 className="item-name">
+        {item.product.name}
+      </h3>
 
-                    {/* Quantity Controls */}
-                    <div className="quantity-controls-group">
-                      <button
-                        onClick={() => dispatch(decrease(item._id))}
-                        className="qty-btn"
-                        disabled={item.quantity <= 1}
-                      >
-                        <FaMinus />
-                      </button>
-                      <span className="qty-value">{item.quantity}</span>
-                      <button
-                        onClick={() => dispatch(increase(item._id))}
-                        className="qty-btn"
-                      >
-                        <FaPlus />
-                      </button>
-                    </div>
+      <p className="item-size-info">
+        Size: <span>{item.selectedSize || "Standard"}</span>
+      </p>
 
-                    <div className="cart-item-subtotal">
-                      ₹{(item.price * item.quantity).toLocaleString("en-IN")}
-                    </div>
+      <span className="item-unit-price">
+        ₹{item.product.price.toLocaleString("en-IN")}
+      </span>
+    </div>
 
-                    <button
-                      onClick={() => handleRemove(item._id)}
-                      className="item-remove-btn"
-                      title="Remove item"
-                    >
-                      <FaTrash />
-                    </button>
-                  </div>
-                ))}
+    <div className="quantity-controls-group">
+      <button
+        onClick={() => dispatch(decrease(item.product._id))}
+        className="qty-btn"
+        disabled={item.quantity <= 1}
+      >
+        <FaMinus />
+      </button>
+
+      <span className="qty-value">
+        {item.quantity}
+      </span>
+
+      <button
+        onClick={() => dispatch(increase(item.product._id))}
+        className="qty-btn"
+      >
+        <FaPlus />
+      </button>
+    </div>
+
+    <div className="cart-item-subtotal">
+      ₹{(
+        item.product.price * item.quantity
+      ).toLocaleString("en-IN")}
+    </div>
+
+    <button
+      onClick={() => handleRemove(item.product._id)}
+      className="item-remove-btn"
+      title="Remove item"
+    >
+      <FaTrash />
+    </button>
+  </div>
+))}
               </div>
 
               {/* Order Summary Panel */}

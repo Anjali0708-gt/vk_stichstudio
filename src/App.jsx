@@ -29,7 +29,7 @@ import Services from './pages/Services';
 import Gallery from './pages/Gallery';
 // import Contact from './pages/Contact';
 import Login from './pages/Login';
-// import Addtocart from './pages/Addtocart';
+import Addtocart from './pages/Addtocart';
 // import BookAppointment from './pages/BookAppointment';
 
 function App() {
@@ -44,7 +44,7 @@ function App() {
         {/* <Route path="/contact" element={<Contact />} /> */}
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/login" element={<Login />} />
-        {/* <Route path="/cart" element={<Addtocart />} /> */}
+        <Route path="/cart" element={<Addtocart />} />
         {/* <Route path="/dashboard" element={<Dashboard />} /> */}
         {/* <Route
           path="/bookappointment"

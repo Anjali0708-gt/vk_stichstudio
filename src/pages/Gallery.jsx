@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import { getProducts } from "../Api/ProductApi";
-import { useCart } from '../context/CartContext';
+import { addCart } from '../redux/cartSlice';
 import './Gallery.css';
 import { FaStar, FaShoppingCart, FaCheck } from 'react-icons/fa';
 
@@ -10,8 +11,8 @@ function Gallery() {
   const [loading, setLoading] = useState(true);
   const [selectedSizes, setSelectedSizes] = useState({}); // productId -> selectedSize
   const [addedItems, setAddedItems] = useState({}); // productId -> boolean (for feedack)
-  
-  const { addToCart } = useCart(); 
+
+  const dispatch = useDispatch();
   const categories = ['All', 'Men', 'Women', 'Traditional'];
 
   useEffect(() => {
@@ -50,17 +51,19 @@ function Gallery() {
     }));
   };
 
-  const handleAddToCart = (product) => {
-    const size = selectedSizes[product.id] || 'Standard M';
-    addToCart(product, size);
-    
-    // Show temporary success feedback
-    setAddedItems(prev => ({ ...prev, [product.id]: true }));
-    setTimeout(() => {
-      setAddedItems(prev => ({ ...prev, [product.id]: false }));
-    }, 1800);
-  };
+  const handleAddToCart = async (product) => {
+  const result = await dispatch(addCart(product));
 
+  if (addCart.rejected.match(result)) {
+    alert("Please login first to add items to cart");
+    return;
+  }
+
+  setAddedItems(prev => ({ ...prev, [product.id]: true }));
+  setTimeout(() => {
+    setAddedItems(prev => ({ ...prev, [product.id]: false }));
+  }, 1800);
+};
   return (
     <div className="gallery-page">
       {/* Page Header */}
