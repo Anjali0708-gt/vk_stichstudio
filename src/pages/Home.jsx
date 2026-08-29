@@ -1,6 +1,6 @@
 import "./Home.css";
 import { useNavigate } from "react-router-dom";
-import {getServices} from '../Api/Serviceapi'
+
 import { getProducts } from "../Api/ProductApi";
 
 import { useState,useEffect } from "react";
@@ -14,8 +14,56 @@ import {
   FaStar,
   FaPhoneAlt,
 } from "react-icons/fa";
+import {
+  MdCheckroom,
+  MdDateRange,
+  MdStraighten,
+  MdStar,
+  MdContentCut,
+  MdAutoAwesome,
+} from "react-icons/md";
 
 
+
+const services = [
+  {
+    id: 1,
+    title: "Custom Tailoring",
+    description: "Perfect fit, crafted just for you.",
+    icon: <MdCheckroom size={48} />,
+  },
+  {
+    id: 2,
+    title: "Wedding & Occasion Wear",
+    description: "Elegant outfits for your special moments.",
+    icon: <MdAutoAwesome size={48} />,
+  },
+  {
+    id: 3,
+    title: "Formal Wear",
+    description: "Sharp and comfortable styles for every occasion.",
+    icon: <MdCheckroom size={48} />,
+  },
+  {
+    id: 4,
+    title: "Bulk & Uniform Orders",
+    description: "Quality uniforms for schools, offices and organizations.",
+    icon: <MdContentCut size={48} />,
+  },
+  {
+    id: 5,
+    title: "Book Appointment",
+    description: "Schedule your fitting appointment with ease.",
+    icon: <MdDateRange size={48} />,
+  },
+  {
+    id: 6,
+    title: "Home Measurement",
+    description: "Get professionally measured from the comfort of your home.",
+    icon: <MdStraighten size={48} />,
+  },
+  
+];
 
 
 
@@ -76,25 +124,16 @@ const galleryImages = [
 
 function Home() {
   const navigate = useNavigate();
-  const [services, setServices] = useState([]);
+  
   const [galleryImages,setgalleryImages]=useState([])
 
 
     useEffect(() => {
-    fetchServices();
+    
     fetchgalleryImages();
   }, []);
 
-  const fetchServices = async () => {
-    try {
-      const res = await getServices();
-
-      setServices(res.data.services);
-        }
-         catch (e) {
-      console.log(e);
-    }
-  };
+  
 
   
   const fetchgalleryImages = async () => {
@@ -138,23 +177,43 @@ function Home() {
 
       
       {/* SERVICES */}
-      <section className="section gray">
-        <h2>Our Services</h2>
+      {/* SERVICES */}
+<section className="services-section">
 
-        <div className="service-grid">
-          {services.map((item, i) => (
-            <div className="service-card" key={i}>
-              <div className="service-image">
-                <img src={item.image} alt={item.name} />
-              </div>
+  {/* Heading */}
+  <div className="services-heading">
+    <div className="services-heading-row">
+      <span className="gold-line"></span>
 
-              <div className="service-overlay">
-                <h3>{item.name}</h3>
-              </div>
-            </div>
-          ))}
+      <h2 className="services-title">OUR SERVICE</h2>
+      <span className="gold-line"></span>
+    </div>
+
+
+    
+  </div>
+  <br />
+
+  {/* Services Grid */}
+  <div className="services-grid">
+    {services.map((service) => (
+      <div className="service-card" key={service.id}>
+        <div className="service-icon-wrapper">
+          <div className="service-icon">{service.icon}</div>
         </div>
-      </section>
+
+        <h3 className="service-title">{service.title}</h3>
+        <p className="service-description">{service.description}</p>
+
+        <div className="service-divider">
+          <span className="divider-line"></span>
+          <span className="divider-dot"></span>
+          <span className="divider-line"></span>
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
 
       {/* GALLERY */}
       <section className="section">

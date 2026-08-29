@@ -11,24 +11,37 @@ import {
   FaSchool,
   FaRulerCombined,
 } from "react-icons/fa";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function Services() {
   const [loading,setLoading]=useState(false);
+  const [services, setServices]=useState([]);
   const navigate = useNavigate();
 
-  const services = async()=>
+  const fetchServices = async()=>
   {
     try
     {
       setLoading(true)
-      const service=await getServices();
+      const response = await getServices();
+      const serviceList = Array.isArray(response.data)
+        ? response.data
+        : response.data?.services || response.data?.service || [];
+      setServices(serviceList);
     }
     catch(e)
     {
       console.log("error in service fecthing",e.message)
     }
+    finally
+    {
+      setLoading(false)
+    }
   }
+
+  useEffect(() => {
+    fetchServices();
+  }, []);
 
   return (
     <div className="services-page">

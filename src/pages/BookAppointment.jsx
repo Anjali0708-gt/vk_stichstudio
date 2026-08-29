@@ -1,368 +1,833 @@
-import { useState } from 'react';
-import { bookingService } from '../Api/OrderApi';
+import { useEffect, useState } from 'react';
+import { bookingService } from '../services/bookingService';
 import { useAuth } from '../context/AuthContext';
 import './BookAppointment.css';
-import { FaUser, FaEnvelope, FaPhone, FaRuler, FaClock, FaCheckCircle } from 'react-icons/fa';
+
+import {
+  FaUser,
+  FaEnvelope,
+  FaPhone,
+  FaClock,
+  FaCheckCircle,
+  FaArrowRight,
+  FaArrowLeft
+} from 'react-icons/fa';
 
 function BookAppointment() {
   const { currentUser, addBookingToState, isAuthenticated } = useAuth();
-  
-  // Step navigation: 1 = Service, 2 = Date & Time, 3 = Measurements, 4 = Contact & Confirm
+
+  // --------------------------------------------------
+  // STEP:
+  // 1 = Service
+  // 2 = Date & Time
+  // 3 = Customer Details
+  // --------------------------------------------------
   const [step, setStep] = useState(1);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [bookingResult, setBookingResult] = useState(null);
+  const [availableSlots, setAvailableSlots] = useState([]);
+const [slotsLoading, setSlotsLoading] = useState(false);
+const [services, setServices] = useState([]);
+const [servicesLoading, setServicesLoading] = useState(false);
 
-  // Form Fields State
+  // --------------------------------------------------
+  // FORM DATA
+  // --------------------------------------------------
   const [formData, setFormData] = useState({
-    service: 'Custom Suit Fitting',
+    service: '',
     date: '',
-    time: '11:00',
+    time: '',
     name: currentUser?.name || '',
     email: currentUser?.email || '',
     phone: '',
-    notes: '',
-    // Measurements (optional/recommended)
-    neck: '',
-    chest: '',
-    waist: '',
-    shoulder: '',
-    sleeve: '',
-    hip: ''
+    notes: ''
   });
 
-  const services = [
-    { name: 'Custom Suit Fitting', duration: '60 mins', desc: 'Consultation, styling, and fabric choice for bespoke business/formal suits.' },
-    { name: 'Bridal & Wedding Consultation', duration: '90 mins', desc: 'Bespoke designs and matching fabric consultations for couples.' },
-    { name: 'Sherwani & Traditional Wear', duration: '60 mins', desc: 'Traditional tailoring for premium celebratory outfits.' },
-    { name: 'Alterations & Repairs', duration: '30 mins', desc: 'Fit checks and professional alteration measurements.' }
-  ];
+  // --------------------------------------------------
+  // SERVICES
+  // Men's Tailoring Services
+  // --------------------------------------------------
+useEffect(() => {
+  const loadServices = async () => {
+    try {
+      setServicesLoading(true);
 
-  const timeSlots = [
-    '10:00', '11:00', '12:00', '13:00', '14:30', '15:30', '16:30', '17:30'
-  ];
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/services`
+      );
 
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to load services");
+      }
+
+      setServices(data.services || data);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setServicesLoading(false);
+    }
+  };
+
+  loadServices();
+}, []);
+  // --------------------------------------------------
+  // AVAILABLE TIME SLOTS
+  // --------------------------------------------------
+  // --------------------------------------------------
+  // HANDLE INPUT CHANGE
+  // --------------------------------------------------
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+
+    setFormData((prev) => ({
       ...prev,
       [name]: value
     }));
+
+    // Remove error when user starts correcting input
+    if (error) {
+      setError('');
+    }
   };
 
-  const handleServiceSelect = (serviceName) => {
-    setFormData(prev => ({ ...prev, service: serviceName }));
-    setStep(2);
-  };
+  const loadAvailableSlots = async (date) => {
+  if (!date) {
+    setAvailableSlots([]);
+    return;
+  }
 
+  try {
+    setSlotsLoading(true);
+    setError('');
+
+    const response = await bookingService.getAvailableSlots(date);
+
+    if (response.success) {
+      setAvailableSlots(response.slots || []);
+    } else {
+      setAvailableSlots([]);
+      setError(response.message || 'Unable to load available slots.');
+    }
+  } catch (err) {
+    setAvailableSlots([]);
+    setError(err.message || 'Unable to load available slots.');
+  } finally {
+    setSlotsLoading(false);
+  }
+};
+
+  // --------------------------------------------------
+  // SELECT SERVICE
+  // --------------------------------------------------
+ const handleServiceSelect = (service) => {
+  setFormData((prev) => ({
+    ...prev,
+    service: service._id,
+    time: ''
+  }));
+
+  setError('');
+  setStep(2);
+};
+  // --------------------------------------------------
+  // VALIDATE STEP 2
+  // DATE & TIME
+  // --------------------------------------------------
   const validateStep2 = () => {
     if (!formData.date) {
       setError('Please select an appointment date.');
       return false;
     }
-    setError('');
-    return true;
-  };
 
-  const validateStep4 = () => {
-    if (!formData.name || !formData.email || !formData.phone) {
-      setError('Name, Email, and Phone number are required.');
+    if (!formData.time) {
+      setError('Please select an available time slot.');
       return false;
     }
+
     setError('');
     return true;
   };
 
+  // --------------------------------------------------
+  // VALIDATE STEP 3
+  // CUSTOMER DETAILS
+  // --------------------------------------------------
+  const validateStep3 = () => {
+    if (!formData.name.trim()) {
+      setError('Please enter your full name.');
+      return false;
+    }
+
+    if (!formData.phone.trim()) {
+      setError('Please enter your phone number.');
+      return false;
+    }
+
+    if (!formData.email.trim()) {
+      setError('Please enter your email address.');
+      return false;
+    }
+
+    setError('');
+    return true;
+  };
+
+  // --------------------------------------------------
+  // FORMAT TIME
+  // Example: 14:30 -> 2:30 PM
+  // --------------------------------------------------
+  const formatTime = (time) => {
+    if (!time) return '';
+
+    const [hours, minutes] = time.split(':');
+
+    let hour = parseInt(hours, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+
+    hour = hour % 12 || 12;
+
+    return `${hour}:${minutes} ${ampm}`;
+  };
+
+  // --------------------------------------------------
+  // FORMAT DATE
+  // --------------------------------------------------
+  const formatDate = (date) => {
+    if (!date) return '';
+
+    const dateObject = new Date(`${date}T00:00:00`);
+
+    return dateObject.toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric'
+    });
+  };
+
+  // --------------------------------------------------
+  // SUBMIT BOOKING
+  // --------------------------------------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateStep4()) return;
+
+    if (!validateStep3()) {
+      return;
+    }
 
     setLoading(true);
     setError('');
 
     try {
-      const response = await bookingService.createBooking(formData, currentUser?.id);
+      const response = await bookingService.createBooking(
+        formData,
+        currentUser?.id
+      );
+
       if (response.success) {
         setBookingResult(response.booking);
-        // Add booking to local state if logged in
+
+        // Add booking to local state if user is logged in
         if (isAuthenticated) {
           addBookingToState(response.booking);
         }
+      } else {
+        setError(
+          response.message || 'Unable to book the appointment.'
+        );
       }
     } catch (err) {
-      setError(err.message || 'Something went wrong.');
+      setError(
+        err.message || 'Something went wrong while booking the appointment.'
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  // --------------------------------------------------
+  // BOOKING SUCCESS SCREEN
+  // --------------------------------------------------
   if (bookingResult) {
     return (
       <div className="booking-success-view">
         <div className="booking-success-card">
+
           <FaCheckCircle className="success-icon-big" />
-          <h1>Appointment Reserved!</h1>
-          <p className="booking-ref">Confirmation Code: <strong>{bookingResult.id}</strong></p>
-          <div className="booking-details-box">
-            <h3>Reservation Summary:</h3>
-            <p><strong>Service:</strong> {bookingResult.service}</p>
-            <p><strong>Date & Time:</strong> {bookingResult.date} at {bookingResult.time}</p>
-            <p><strong>Client:</strong> {bookingResult.name}</p>
-            <p><strong>Status:</strong> {bookingResult.status}</p>
-          </div>
-          <p className="success-note">
-            A confirmation email has been sent. Please bring any fabric samples or design references you have to your fitting session at our studio.
+
+          <h1>Appointment pending</h1>
+
+          <p className="booking-ref">
+            Confirmation Code:{' '}
+            <strong>
+              {bookingResult.id}
+            </strong>
           </p>
-          <button onClick={() => {
-            setStep(1);
-            setBookingResult(null);
-            setFormData(prev => ({ ...prev, date: '', phone: '', notes: '', neck: '', chest: '', waist: '', shoulder: '', sleeve: '', hip: '' }));
-          }} className="new-booking-btn">
-            Book Another Fitting
+
+          <div className="booking-details-box">
+
+            <h3>Appointment Summary</h3>
+
+            <p>
+              <strong>Service:</strong>{' '}
+              {bookingResult.service}
+            </p>
+
+            <p>
+              <strong>Date:</strong>{' '}
+              {formatDate(bookingResult.date)}
+            </p>
+
+            <p>
+              <strong>Time:</strong>{' '}
+              {formatTime(bookingResult.time)}
+            </p>
+
+            <p>
+              <strong>Client:</strong>{' '}
+              {bookingResult.name}
+            </p>
+
+            <p>
+              <strong>Phone:</strong>{' '}
+              {bookingResult.phone}
+            </p>
+
+            <p>
+              <strong>Status:</strong>{' '}
+              {bookingResult.status}
+            </p>
+
+          </div>
+
+          <p className="success-note">
+            Your appointment has been successfully booked.
+            Please arrive at the selected time. Our tailor
+            will discuss your requirements and take the
+            necessary measurements during your appointment.
+          </p>
+
+          <button
+            onClick={() => {
+              setStep(1);
+              setBookingResult(null);
+
+              setFormData({
+                service: 'Custom Suit',
+                date: '',
+                time: '',
+                name: currentUser?.name || '',
+                email: currentUser?.email || '',
+                phone: '',
+                notes: ''
+              });
+
+              setError('');
+            }}
+            className="new-booking-btn"
+          >
+            Book Another Appointment
           </button>
+
         </div>
       </div>
     );
   }
 
+  // --------------------------------------------------
+  // MAIN BOOKING PAGE
+  // --------------------------------------------------
   return (
     <div className="booking-page">
+
       <div className="booking-container">
-        {/* Progress Stepper Header */}
+
+        {/* =========================================
+            HEADER
+        ========================================== */}
+
         <div className="stepper-header">
-          <h1>Book a Fitting Session</h1>
-          <p>Schedule a personal styling consultation at our premium studio.</p>
+
+          <h1>Book an Appointment</h1>
+
+          <p>
+            Schedule a personal appointment with our
+            professional men's tailoring team.
+          </p>
+
+          {/* =========================================
+              3 STEP PROGRESS
+          ========================================== */}
+
           <div className="stepper-dots">
-            <span className={`dot ${step >= 1 ? 'active' : ''} ${step === 1 ? 'current' : ''}`}>1. Service</span>
+
+            <span
+              className={`dot ${
+                step >= 1 ? 'active' : ''
+              } ${
+                step === 1 ? 'current' : ''
+              }`}
+            >
+              1. Service
+            </span>
+
             <span className="line"></span>
-            <span className={`dot ${step >= 2 ? 'active' : ''} ${step === 2 ? 'current' : ''}`}>2. Date & Time</span>
+
+            <span
+              className={`dot ${
+                step >= 2 ? 'active' : ''
+              } ${
+                step === 2 ? 'current' : ''
+              }`}
+            >
+              2. Date & Time
+            </span>
+
             <span className="line"></span>
-            <span className={`dot ${step >= 3 ? 'active' : ''} ${step === 3 ? 'current' : ''}`}>3. Measurements</span>
-            <span className="line"></span>
-            <span className={`dot ${step >= 4 ? 'active' : ''} ${step === 4 ? 'current' : ''}`}>4. Information</span>
+
+            <span
+              className={`dot ${
+                step >= 3 ? 'active' : ''
+              } ${
+                step === 3 ? 'current' : ''
+              }`}
+            >
+              3. Your Details
+            </span>
+
           </div>
+
         </div>
 
-        {error && <div className="booking-error-alert">{error}</div>}
+        {/* =========================================
+            ERROR MESSAGE
+        ========================================== */}
 
-        {/* STEP 1: SELECT SERVICE */}
-        {step === 1 && (
-          <div className="step-content">
-            <h2>Select Consultation Service</h2>
-            <div className="services-selector-grid">
-              {services.map((srv) => (
-                <div 
-                  key={srv.name} 
-                  className={`service-option-card ${formData.service === srv.name ? 'selected' : ''}`}
-                  onClick={() => handleServiceSelect(srv.name)}
-                >
-                  <div className="service-card-meta">
-                    <h3>{srv.name}</h3>
-                    <span className="duration-tag"><FaClock /> {srv.duration}</span>
-                  </div>
-                  <p>{srv.desc}</p>
-                  <button className="select-srv-action">Select Service</button>
-                </div>
-              ))}
-            </div>
+        {error && (
+          <div className="booking-error-alert">
+            {error}
           </div>
         )}
 
-        {/* STEP 2: DATE & TIME SELECTOR */}
-        {step === 2 && (
+        {/* =========================================
+            STEP 1
+            SELECT SERVICE
+        ========================================== */}
+
+        {step === 1 && (
+
           <div className="step-content">
-            <h2>Select Date & Time Slot</h2>
+
+            <h2>What would you like to book?</h2>
+
+            <p className="step-description">
+              Choose a tailoring service for your appointment.
+            </p>
+
+            <div className="services-selector-grid">
+
+              {servicesLoading ? (
+  <p>Loading services...</p>
+) : (
+  services.map((service) => (
+    <div
+      key={service._id}
+      className={`service-option-card ${
+        formData.service === service._id ? 'selected' : ''
+      }`}
+      onClick={() => handleServiceSelect(service)}
+    >
+      <img
+        src={service.image}
+        alt={service.name}
+        className="service-image"
+      />
+
+      <div className="service-card-content">
+        <div className="service-card-meta">
+          <h3>{service.name}</h3>
+
+          <span className="duration-tag">
+            <FaClock />
+            {service.duration} mins
+          </span>
+        </div>
+
+        <p>{service.description}</p>
+
+        <button
+          type="button"
+          className="select-srv-action"
+        >
+          Select Service
+          <FaArrowRight />
+        </button>
+      </div>
+    </div>
+  ))
+)}
+            </div>
+
+          </div>
+
+        )}
+
+        {/* =========================================
+            STEP 2
+            DATE & TIME
+        ========================================== */}
+
+        {step === 2 && (
+
+          <div className="step-content">
+
+            <h2>Select Date & Time</h2>
+
+            <p className="step-description">
+              Choose a convenient date and available time
+              for your appointment.
+            </p>
+
             <div className="date-time-flex-container">
+
+              {/* DATE */}
+
               <div className="date-picker-box">
-                <label htmlFor="booking-date">Choose Date:</label>
-                <input 
-                  type="date" 
-                  id="booking-date"
-                  name="date"
-                  value={formData.date}
-                  onChange={handleInputChange}
-                  min={new Date().toISOString().split('T')[0]} 
-                  className="date-input-field"
-                />
+
+                <label htmlFor="booking-date">
+                  Appointment Date
+                </label>
+
+                <input
+  type="date"
+  id="booking-date"
+  name="date"
+  value={formData.date}
+  onChange={(e) => {
+    handleInputChange(e);
+
+    setFormData((prev) => ({
+      ...prev,
+      date: e.target.value,
+      time: ''
+    }));
+
+    loadAvailableSlots(e.target.value);
+  }}
+  min={
+    new Date()
+      .toISOString()
+      .split('T')[0]
+  }
+  className="date-input-field"
+/>
               </div>
+
+              {/* TIME */}
 
               <div className="time-picker-box">
-                <label>Available Hour Slots:</label>
+
+                <label>
+                  Available Time Slots
+                </label>
+
                 <div className="time-slots-grid">
-                  {timeSlots.map((time) => (
-                    <button
-                      key={time}
-                      type="button"
-                      className={`time-slot-btn ${formData.time === time ? 'selected' : ''}`}
-                      onClick={() => setFormData(prev => ({ ...prev, time }))}
-                    >
-                      {time}
-                    </button>
-                  ))}
-                </div>
+
+  {slotsLoading ? (
+    <p>Loading available slots...</p>
+  ) : !formData.date ? (
+    <p>Please select a date first.</p>
+  ) : availableSlots.length === 0 ? (
+    <p>No slots available for this date.</p>
+  ) : (
+    availableSlots.map((slot) => (
+      <button
+        key={slot.time}
+        type="button"
+        disabled={!slot.available}
+        className={`time-slot-btn ${
+          formData.time === slot.time
+            ? 'selected'
+            : ''
+        } ${
+          !slot.available
+            ? 'unavailable'
+            : ''
+        }`}
+        onClick={() => {
+          if (!slot.available) return;
+
+          setFormData((prev) => ({
+            ...prev,
+            time: slot.time
+          }));
+
+          setError('');
+        }}
+      >
+        {formatTime(slot.time)}
+
+        {!slot.available && (
+          <span>Booked</span>
+        )}
+      </button>
+    ))
+  )}
+
+</div>
               </div>
+
             </div>
 
+            {/* SELECTED SERVICE SUMMARY */}
+
+            <div className="selected-service-summary">
+
+              <strong>
+                Selected Service:
+              </strong>
+<span>
+  {services.find(
+    (service) => service._id === formData.service
+  )?.name || ''}
+</span>
+
+            </div>
+
+            {/* ACTIONS */}
+
             <div className="step-actions">
-              <button type="button" onClick={() => setStep(1)} className="step-back-btn">Back</button>
-              <button 
-                type="button" 
-                onClick={() => validateStep2() && setStep(3)} 
+
+              <button
+                type="button"
+                onClick={() => {
+                  setStep(1);
+                  setError('');
+                }}
+                className="step-back-btn"
+              >
+                <FaArrowLeft />
+                Back
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (validateStep2()) {
+                    setStep(3);
+                  }
+                }}
                 className="step-next-btn"
               >
-                Continue to Measurements
+                Continue
+                <FaArrowRight />
               </button>
+
             </div>
+
           </div>
+
         )}
 
-        {/* STEP 3: MEASUREMENT FIELDS (OPTIONAL) */}
+        {/* =========================================
+            STEP 3
+            CUSTOMER DETAILS
+        ========================================== */}
+
         {step === 3 && (
-          <div className="step-content">
-            <div className="measurements-header">
-              <h2>Provide Your Measurements <span className="optional-tag">(Optional)</span></h2>
-              <p>Adding your measurements allows our cutter to prepare fitting blocks in advance. If unsure, you can leave them blank and we will take them in the studio.</p>
-            </div>
 
-            <div className="measurements-input-grid">
-              <div className="measurement-field">
-                <label><FaRuler /> Neck (inches)</label>
-                <input 
-                  type="number" 
-                  name="neck" 
-                  placeholder="e.g. 15.5"
-                  value={formData.neck}
-                  onChange={handleInputChange}
-                  step="0.1"
-                />
-              </div>
-              <div className="measurement-field">
-                <label><FaRuler /> Chest (inches)</label>
-                <input 
-                  type="number" 
-                  name="chest" 
-                  placeholder="e.g. 40"
-                  value={formData.chest}
-                  onChange={handleInputChange}
-                  step="0.1"
-                />
-              </div>
-              <div className="measurement-field">
-                <label><FaRuler /> Waist (inches)</label>
-                <input 
-                  type="number" 
-                  name="waist" 
-                  placeholder="e.g. 34"
-                  value={formData.waist}
-                  onChange={handleInputChange}
-                  step="0.1"
-                />
-              </div>
-              <div className="measurement-field">
-                <label><FaRuler /> Shoulder Width (inches)</label>
-                <input 
-                  type="number" 
-                  name="shoulder" 
-                  placeholder="e.g. 18.5"
-                  value={formData.shoulder}
-                  onChange={handleInputChange}
-                  step="0.1"
-                />
-              </div>
-              <div className="measurement-field">
-                <label><FaRuler /> Sleeve Length (inches)</label>
-                <input 
-                  type="number" 
-                  name="sleeve" 
-                  placeholder="e.g. 25"
-                  value={formData.sleeve}
-                  onChange={handleInputChange}
-                  step="0.1"
-                />
-              </div>
-              <div className="measurement-field">
-                <label><FaRuler /> Hips (inches)</label>
-                <input 
-                  type="number" 
-                  name="hip" 
-                  placeholder="e.g. 41"
-                  value={formData.hip}
-                  onChange={handleInputChange}
-                  step="0.1"
-                />
-              </div>
-            </div>
+          <form
+            onSubmit={handleSubmit}
+            className="step-content"
+          >
 
-            <div className="step-actions">
-              <button type="button" onClick={() => setStep(2)} className="step-back-btn">Back</button>
-              <button type="button" onClick={() => setStep(4)} className="step-next-btn">Continue to Details</button>
-            </div>
-          </div>
-        )}
+            <h2>Your Details</h2>
 
-        {/* STEP 4: CONTACT INFO & SUBMISSION */}
-        {step === 4 && (
-          <form onSubmit={handleSubmit} className="step-content">
-            <h2>Confirm Contact Details</h2>
+            <p className="step-description">
+              Enter your contact details so we can confirm
+              your appointment.
+            </p>
+
             <div className="contact-form-grid">
+
+              {/* NAME */}
+
               <div className="form-group-booking">
-                <label htmlFor="b-name"><FaUser /> Full Name</label>
-                <input 
-                  type="text" 
+
+                <label htmlFor="b-name">
+                  <FaUser />
+                  Full Name
+                </label>
+
+                <input
+                  type="text"
                   id="b-name"
-                  name="name" 
-                  value={formData.name} 
+                  name="name"
+                  placeholder="Enter your full name"
+                  value={formData.name}
                   onChange={handleInputChange}
                   required
                 />
+
               </div>
 
-              <div className="form-group-booking">
-                <label htmlFor="b-email"><FaEnvelope /> Email Address</label>
-                <input 
-                  type="email" 
-                  id="b-email"
-                  name="email" 
-                  value={formData.email} 
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
+              {/* PHONE */}
 
               <div className="form-group-booking">
-                <label htmlFor="b-phone"><FaPhone /> Phone Number</label>
-                <input 
-                  type="tel" 
+
+                <label htmlFor="b-phone">
+                  <FaPhone />
+                  Phone Number
+                </label>
+
+                <input
+                  type="tel"
                   id="b-phone"
-                  name="phone" 
+                  name="phone"
                   placeholder="e.g. +91 9876543210"
-                  value={formData.phone} 
+                  value={formData.phone}
                   onChange={handleInputChange}
                   required
                 />
+
               </div>
+
+              {/* EMAIL */}
+
+              <div className="form-group-booking">
+
+                <label htmlFor="b-email">
+                  <FaEnvelope />
+                  Email Address
+                  <span className="optional-tag">
+                    Optional
+                  </span>
+                </label>
+
+                <input
+                  type="email"
+                  id="b-email"
+                  name="email"
+                  placeholder="Enter your email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                />
+
+              </div>
+
+              {/* NOTES */}
 
               <div className="form-group-booking notes-group">
-                <label htmlFor="b-notes">Styling Preferences / Notes</label>
-                <textarea 
+
+                <label htmlFor="b-notes">
+                  Special Request / Notes
+                  <span className="optional-tag">
+                    Optional
+                  </span>
+                </label>
+
+                <textarea
                   id="b-notes"
-                  name="notes" 
-                  placeholder="Tell us about the fabric you have in mind, color preferences, or the occasion..."
-                  value={formData.notes} 
+                  name="notes"
+                  placeholder="Example: I need a black suit for a wedding..."
+                  value={formData.notes}
                   onChange={handleInputChange}
+                  rows="4"
                 />
+
               </div>
+
             </div>
 
-            <div className="step-actions">
-              <button type="button" onClick={() => setStep(3)} className="step-back-btn" disabled={loading}>Back</button>
-              <button type="submit" className="booking-submit-action" disabled={loading}>
-                {loading ? 'Confirming Appointment...' : 'Submit Booking Request'}
-              </button>
+            {/* =====================================
+                BOOKING SUMMARY
+            ====================================== */}
+
+            <div className="booking-summary">
+
+              <h3>Appointment Summary</h3>
+
+              <div className="summary-row">
+
+                <span>
+                  Service
+                </span>
+
+                <strong>
+                  {formData.service}
+                </strong>
+
+              </div>
+
+              <div className="summary-row">
+
+                <span>
+                  Date
+                </span>
+
+                <strong>
+                  {formatDate(formData.date)}
+                </strong>
+
+              </div>
+
+              <div className="summary-row">
+
+                <span>
+                  Time
+                </span>
+
+                <strong>
+                  {formatTime(formData.time)}
+                </strong>
+
+              </div>
+
             </div>
+
+            {/* =====================================
+                ACTIONS
+            ====================================== */}
+
+            <div className="step-actions">
+
+              <button
+                type="button"
+                onClick={() => {
+                  setStep(2);
+                  setError('');
+                }}
+                className="step-back-btn"
+                disabled={loading}
+              >
+                <FaArrowLeft />
+                Back
+              </button>
+
+              <button
+                type="submit"
+                className="booking-submit-action"
+                disabled={loading}
+              >
+
+                {loading
+                  ? 'Confirming Appointment...'
+                  : 'Confirm Appointment'
+                }
+
+              </button>
+
+            </div>
+
           </form>
+
         )}
+
       </div>
+
     </div>
   );
 }

@@ -30,7 +30,7 @@ import Gallery from './pages/Gallery';
 // import Contact from './pages/Contact';
 import Login from './pages/Login';
 import Addtocart from './pages/Addtocart';
-// import BookAppointment from './pages/BookAppointment';
+import BookAppointment from './pages/BookAppointment';
 
 function App() {
   return (
@@ -45,11 +45,8 @@ function App() {
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/login" element={<Login />} />
         <Route path="/cart" element={<Addtocart />} />
+        <Route path="/bookappointment" element={<BookAppointment />} />
         {/* <Route path="/dashboard" element={<Dashboard />} /> */}
-        {/* <Route
-          path="/bookappointment"
-          element={<BookAppointment />}
-        /> */}
       </Routes>
 
       <Footer />
