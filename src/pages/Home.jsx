@@ -14,6 +14,7 @@ import {
   FaStar,
   FaPhoneAlt,
 } from "react-icons/fa";
+
 import {
   MdCheckroom,
   MdDateRange,
