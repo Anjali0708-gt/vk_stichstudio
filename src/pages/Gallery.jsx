@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { getProducts } from "../Api/ProductApi";
 import { addCart } from '../redux/cartSlice';
+import { useNavigate } from "react-router-dom";
 import './Gallery.css';
 import { FaStar, FaShoppingCart, FaCheck } from 'react-icons/fa';
 
@@ -12,6 +13,7 @@ function Gallery() {
   const [selectedSizes, setSelectedSizes] = useState({}); // productId -> selectedSize
   const [addedItems, setAddedItems] = useState({}); // productId -> boolean (for feedack)
 
+   const navigate = useNavigate();
   const dispatch = useDispatch();
   const categories = ['All', 'Men', 'Women', 'Traditional'];
 
@@ -112,7 +114,12 @@ function Gallery() {
               return (
                 <div className="product-card" key={product.id}>
                   <div className="product-img-wrapper">
-                    <img src={product.image} alt={product.name} className="product-image" />
+                    <img
+  src={product.image}
+  alt={product.name}
+  className="product-image"
+  onClick={() => navigate(`/product/${product.id}`)}
+/>
                     <span className="product-category-badge">{product.category}</span>
                   </div>
 
@@ -126,7 +133,12 @@ function Gallery() {
                       <span className="reviews-count">({product.reviews})</span>
                     </div>
 
-                    <h3 className="product-title">{product.name}</h3>
+                    <h3 
+  className="product-title"
+  onClick={() => navigate(`/product/${product.id}`)}
+>
+  {product.name}
+</h3>
                     <p className="product-description">{product.description}</p>
                     
                     <div className="product-price">

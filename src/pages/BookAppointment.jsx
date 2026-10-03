@@ -212,42 +212,47 @@ useEffect(() => {
   // SUBMIT BOOKING
   // --------------------------------------------------
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!validateStep3()) {
-      return;
-    }
+  if (!validateStep3()) {
+    return;
+  }
 
-    setLoading(true);
-    setError('');
+  setLoading(true);
+  setError('');
 
-    try {
-      const response = await bookingService.createBooking(
-        formData,
-        currentUser?.id
-      );
+  try {
+    const response = await bookingService.createBooking(
+      formData,
+      currentUser?.id
+    );
 
-      if (response.success) {
-        setBookingResult(response.booking);
+    console.log("SUCCESS:", response.success);
+    console.log("APPOINTMENT:", response.appointment);
+    console.log("FULL RESPONSE:", response);
 
-        // Add booking to local state if user is logged in
-        if (isAuthenticated) {
-          addBookingToState(response.booking);
-        }
-      } else {
-        setError(
-          response.message || 'Unable to book the appointment.'
-        );
+    if (response.success) {
+      // Backend returns "appointment", not "booking"
+      setBookingResult(response.appointment);
+
+      // Add booking to local state if user is logged in
+      if (isAuthenticated) {
+        addBookingToState(response.appointment);
       }
-    } catch (err) {
+    } else {
       setError(
-        err.message || 'Something went wrong while booking the appointment.'
+        response.message || 'Unable to book the appointment.'
       );
-    } finally {
-      setLoading(false);
     }
-  };
 
+  } catch (err) {
+    setError(
+      err.message || 'Something went wrong while booking the appointment.'
+    );
+  } finally {
+    setLoading(false);
+  }
+};
   // --------------------------------------------------
   // BOOKING SUCCESS SCREEN
   // --------------------------------------------------
@@ -263,8 +268,8 @@ useEffect(() => {
           <p className="booking-ref">
             Confirmation Code:{' '}
             <strong>
-              {bookingResult.id}
-            </strong>
+  {bookingResult._id}
+</strong>
           </p>
 
           <div className="booking-details-box">
@@ -272,9 +277,9 @@ useEffect(() => {
             <h3>Appointment Summary</h3>
 
             <p>
-              <strong>Service:</strong>{' '}
-              {bookingResult.service}
-            </p>
+  <strong>Service:</strong>{' '}
+  {bookingResult.service?.name}
+</p>
 
             <p>
               <strong>Date:</strong>{' '}

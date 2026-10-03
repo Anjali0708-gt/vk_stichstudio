@@ -1,72 +1,75 @@
-import "./Home.css";
+import "./home.css";
 import { useNavigate } from "react-router-dom";
-
 import { getProducts } from "../Api/ProductApi";
+import { useEffect, useRef, useState } from "react";
 
-import { useState,useEffect } from "react";
 import {
   FaTshirt,
   FaRulerCombined,
   FaTruck,
   FaCut,
-  FaUserTie,
   FaCalendarCheck,
   FaStar,
   FaPhoneAlt,
+  FaChevronLeft,
+  FaChevronRight,
+  FaArrowRight,
 } from "react-icons/fa";
 
 import {
   MdCheckroom,
   MdDateRange,
   MdStraighten,
-  MdStar,
   MdContentCut,
   MdAutoAwesome,
 } from "react-icons/md";
 
 
+// ================= SERVICES =================
 
 const services = [
   {
     id: 1,
     title: "Custom Tailoring",
     description: "Perfect fit, crafted just for you.",
-    icon: <MdCheckroom size={48} />,
+    icon: <MdCheckroom />,
   },
   {
     id: 2,
     title: "Wedding & Occasion Wear",
     description: "Elegant outfits for your special moments.",
-    icon: <MdAutoAwesome size={48} />,
+    icon: <MdAutoAwesome />,
   },
   {
     id: 3,
     title: "Formal Wear",
     description: "Sharp and comfortable styles for every occasion.",
-    icon: <MdCheckroom size={48} />,
+    icon: <MdCheckroom />,
   },
   {
     id: 4,
     title: "Bulk & Uniform Orders",
-    description: "Quality uniforms for schools, offices and organizations.",
-    icon: <MdContentCut size={48} />,
+    description:
+      "Quality uniforms for schools, offices and organizations.",
+    icon: <MdContentCut />,
   },
   {
     id: 5,
     title: "Book Appointment",
     description: "Schedule your fitting appointment with ease.",
-    icon: <MdDateRange size={48} />,
+    icon: <MdDateRange />,
   },
   {
     id: 6,
     title: "Home Measurement",
-    description: "Get professionally measured from the comfort of your home.",
-    icon: <MdStraighten size={48} />,
+    description:
+      "Get professionally measured from the comfort of your home.",
+    icon: <MdStraighten />,
   },
-  
 ];
 
 
+// ================= FEATURES =================
 
 const features = [
   {
@@ -91,13 +94,8 @@ const features = [
   },
 ];
 
-const steps = [
-  { title: "Book Consultation", icon: <FaCalendarCheck /> },
-  { title: "Take Measurements" },
-  { title: "Choose Fabric" },
-  { title: "Tailoring Process" },
-  { title: "Delivery" },
-];
+
+// ================= REVIEWS =================
 
 const reviews = [
   {
@@ -117,183 +115,405 @@ const reviews = [
   },
 ];
 
-const galleryImages = [
-  "https://images.unsplash.com/photo-1593030761757-71fae45fa0e7",
-  "https://images.unsplash.com/photo-1617127365659-c47fa864d8bc",
-  "https://images.unsplash.com/photo-1521572267360-ee0c2909d518",
-];
+
+// ================= HOME =================
 
 function Home() {
   const navigate = useNavigate();
-  
-  const [galleryImages,setgalleryImages]=useState([])
+
+  const [galleryImages, setGalleryImages] = useState([]);
+  const galleryRef = useRef(null);
 
 
-    useEffect(() => {
-    
-    fetchgalleryImages();
+  // Fetch products
+  useEffect(() => {
+    fetchGalleryImages();
   }, []);
 
-  
 
-  
-  const fetchgalleryImages = async () => {
+  const fetchGalleryImages = async () => {
     try {
       const res = await getProducts();
-       console.log(res.data)
-      setgalleryImages(res.data.products);
-        }
-         catch (e) {
-      console.log(e);
+
+      console.log("Products:", res.data);
+
+      setGalleryImages(res.data.products || []);
+    } catch (error) {
+      console.log("Gallery error:", error);
     }
   };
 
+
+  // ================= SLIDER =================
+
+  const scrollCollection = (direction) => {
+    const slider = galleryRef.current;
+    if (!slider) return;
+
+    const card = slider.querySelector(".collection-card");
+    const gap = Number.parseFloat(window.getComputedStyle(slider).columnGap) || 0;
+    const distance = card ? card.getBoundingClientRect().width + gap : slider.clientWidth;
+
+    slider.scrollBy({
+      left: direction * distance,
+      behavior: "smooth",
+    });
+  };
+
+  const slideLeft = () => {
+    scrollCollection(-1);
+  };
+
+
+  const slideRight = () => {
+    scrollCollection(1);
+  };
 
 
   return (
     <div className="home">
 
-      {/* HERO */}
+
+      {/* ================= HERO ================= */}
+
       <section className="hero">
+
         <div className="hero-overlay">
-          <h1>Crafted for Your Story</h1>
+
+          <span className="hero-small-title">
+            VK STITCH STUDIO
+          </span>
+
+          <h1>
+            Crafted for Your Story.
+            <br />
+            Tailored for Your Legacy.
+          </h1>
+
           <p>
-            Premium tailoring for weddings, business & special occasions
+            Premium tailoring for weddings, business & special occasions.
           </p>
 
           <div className="hero-buttons">
+
             <button
               className="primary"
               onClick={() => navigate("/bookappointment")}
             >
-              <FaCalendarCheck /> Book Appointment
+              <FaCalendarCheck />
+              Book Appointment
             </button>
 
-            <button className="secondary" onClick={() => navigate("/gallery")}>
+            <button
+              className="secondary"
+              onClick={() => navigate("/gallery")}
+            >
               Explore Collection
+              <FaArrowRight />
             </button>
+
           </div>
-        </div>
-      </section>
 
-      
-      {/* SERVICES */}
-      {/* SERVICES */}
-<section className="services-section">
-
-  {/* Heading */}
-  <div className="services-heading">
-    <div className="services-heading-row">
-      <span className="gold-line"></span>
-
-      <h2 className="services-title">OUR SERVICE</h2>
-      <span className="gold-line"></span>
-    </div>
-
-
-    
-  </div>
-  <br />
-
-  {/* Services Grid */}
-  <div className="services-grid">
-    {services.map((service) => (
-      <div className="service-card" key={service.id}>
-        <div className="service-icon-wrapper">
-          <div className="service-icon">{service.icon}</div>
         </div>
 
-        <h3 className="service-title">{service.title}</h3>
-        <p className="service-description">{service.description}</p>
-
-        <div className="service-divider">
-          <span className="divider-line"></span>
-          <span className="divider-dot"></span>
-          <span className="divider-line"></span>
-        </div>
-      </div>
-    ))}
-  </div>
-</section>
-
-      {/* GALLERY */}
-      <section className="section">
-        <h2>Designer Collection</h2>
-
-        <div className="gallery">
-          {galleryImages.map((item, i) => (
-           <img
-      key={item._id}
-      src={item.image}
-      alt={item.name}
-    />
-          ))}
-        </div>
-      </section>
-{/* 
-      
-      <section className="section gray">
-        <h2>How It Works</h2>
-
-        <div className="steps">
-          {steps.map((s, i) => (
-            <div className="step" key={i}>
-              <span className="step-number">{i + 1}</span>
-              <span>{s.title}</span>
-            </div>
-          ))}
-        </div>
-      </section> */}
-       
-       {/* FEATURES */}
-      <section className="section">
-        <h2>Why Choose Us</h2>
-
-        <div className="card-container">
-          {features.map((f, i) => (
-            <div className="card" key={i}>
-              <div className="icon">{f.icon}</div>
-              <h3>{f.title}</h3>
-              <p>{f.desc}</p>
-            </div>
-          ))}
-        </div>
       </section>
 
 
-      {/* REVIEWS */}
-      <section className="section">
-        <h2>Customer Reviews</h2>
+      {/* ================= SERVICES ================= */}
 
-        <div className="card-container">
-          {reviews.map((r, i) => (
-            <div className="card review-card" key={i}>
-              <div className="stars">
-                {[...Array(r.stars)].map((_, index) => (
-                  <FaStar key={index} />
-                ))}
+      <section className="services-section">
+
+        <div className="section-heading">
+
+          <span className="heading-line"></span>
+
+          <div>
+            <span className="heading-small">
+              WHAT WE OFFER
+            </span>
+
+            <h2>Our Services</h2>
+          </div>
+
+          <span className="heading-line"></span>
+
+        </div>
+
+
+        <div className="services-grid">
+
+          {services.map((service) => (
+
+            <div
+              className="service-card"
+              key={service.id}
+              onClick={() => {
+                if (service.title === "Book Appointment") {
+                  navigate("/bookappointment");
+                }
+              }}
+            >
+
+              <div className="service-icon">
+                {service.icon}
               </div>
 
-              <p>{r.text}</p>
-              <h4>- {r.name}</h4>
+              <h3>{service.title}</h3>
+
+              <p>{service.description}</p>
+
+              <div className="gold-decoration">
+                <span></span>
+                <b>◆</b>
+                <span></span>
+              </div>
+
             </div>
+
           ))}
+
         </div>
+
       </section>
 
-      {/* CONTACT */}
-      <section className="section gray">
-        <h2>Contact Us</h2>
 
-        <form className="contact-form">
-          <input type="text" placeholder="Your Name" />
-          <input type="email" placeholder="Your Email" />
-          <textarea placeholder="Your Message"></textarea>
+      {/* ================= DESIGNER COLLECTION ================= */}
 
-          <button type="submit">
-            <FaPhoneAlt /> Send Message
+      <section className="collection-section">
+
+        <div className="section-heading">
+
+          <span className="heading-line"></span>
+
+          <div>
+            <span className="heading-small">
+              OUR LATEST WORK
+            </span>
+
+            <h2>Designer Collection</h2>
+          </div>
+
+          <span className="heading-line"></span>
+
+        </div>
+
+
+        <div className="collection-wrapper">
+
+          {/* LEFT ARROW */}
+
+          <button
+            className="collection-arrow collection-arrow-left"
+            aria-label="Scroll to previous products"
+            onClick={slideLeft}
+          >
+            <FaChevronLeft />
           </button>
-        </form>
+
+
+          {/* SLIDER */}
+
+          <div
+            className="collection-slider"
+            ref={galleryRef}
+          >
+
+            {galleryImages.length > 0 ? (
+
+              galleryImages.map((item) => (
+
+                <div className="collection-card" key={item._id}>
+
+  <img
+    src={item.image}
+    alt={item.name}
+  />
+
+  <div className="collection-overlay"></div>
+
+  <button
+    className="collection-name"
+    onClick={() => navigate("/gallery")}
+  >
+    <span>{item.name}</span>
+    <FaArrowRight />
+  </button>
+
+</div>
+              ))
+
+            ) : (
+
+              <div className="empty-gallery">
+                No products available.
+              </div>
+
+            )}
+
+          </div>
+
+
+          {/* RIGHT ARROW */}
+
+          <button
+            className="collection-arrow collection-arrow-right"
+            aria-label="Scroll to next products"
+            onClick={slideRight}
+          >
+            <FaChevronRight />
+          </button>
+
+        </div>
+
+
+        {/* VIEW ALL */}
+
+        <button
+          className="collection-view-all"
+          onClick={() => navigate("/gallery")}
+        >
+          View Full Collection
+          <FaArrowRight />
+        </button>
+
+      </section>
+
+
+      {/* ================= WHY CHOOSE US ================= */}
+
+      <section className="section">
+
+        <div className="section-heading">
+
+          <span className="heading-line"></span>
+
+          <div>
+            <span className="heading-small">
+              WHY VK STITCH STUDIO
+            </span>
+
+            <h2>Why Choose Us</h2>
+          </div>
+
+          <span className="heading-line"></span>
+
+        </div>
+
+
+        <div className="card-container">
+
+          {features.map((feature, index) => (
+
+            <div
+              className="feature-card"
+              key={index}
+            >
+
+              <div className="feature-icon">
+                {feature.icon}
+              </div>
+
+              <h3>{feature.title}</h3>
+
+              <p>{feature.desc}</p>
+
+            </div>
+
+          ))}
+
+        </div>
+
+      </section>
+
+
+      {/* ================= REVIEWS ================= */}
+
+      <section className="reviews-section">
+
+        <div className="section-heading">
+
+          <span className="heading-line"></span>
+
+          <div>
+            <span className="heading-small">
+              CLIENT STORIES
+            </span>
+
+            <h2>Customer Reviews</h2>
+          </div>
+
+          <span className="heading-line"></span>
+
+        </div>
+
+
+        <div className="card-container">
+
+          {reviews.map((review, index) => (
+
+            <div
+              className="review-card"
+              key={index}
+            >
+
+              <div className="stars">
+
+                {[...Array(review.stars)].map(
+                  (_, starIndex) => (
+                    <FaStar key={starIndex} />
+                  )
+                )}
+
+              </div>
+
+              <p>
+                "{review.text}"
+              </p>
+
+              <h4>
+                — {review.name}
+              </h4>
+
+            </div>
+
+          ))}
+
+        </div>
+
+      </section>
+
+
+      {/* ================= CONTACT ================= */}
+
+      <section className="contact-section">
+
+        <div className="contact-content">
+
+          <span className="heading-small">
+            LET'S CREATE SOMETHING SPECIAL
+          </span>
+
+          <h2>
+            Your Perfect Fit
+            <br />
+            Starts Here.
+          </h2>
+
+          <p>
+            Visit VK Stitch Studio and experience
+            premium tailoring made especially for you.
+          </p>
+
+          <button
+            className="primary"
+            onClick={() => navigate("/bookappointment")}
+          >
+            <FaCalendarCheck />
+            Book Your Fitting
+          </button>
+
+        </div>
+
       </section>
 
     </div>
