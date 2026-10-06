@@ -1,9 +1,11 @@
 import API from "./axios";
 
-// Get reviews for a particular product
-export const getProductReviews = (productId) =>
-  API.get(`/reviews/${productId}/reviews`);
 
-// Add review for a particular product
-export const addReview = (productId, data) =>
-  API.post(`/reviews/${productId}/reviews`, data);
+export const getProductReviews = (productId) => {
+  return API.get(`/reviews/${productId}/reviews`);
+};
+
+
+export const addReview = (productId, data) => {
+  return API.post(`/reviews/${productId}/reviews`, data);
+};

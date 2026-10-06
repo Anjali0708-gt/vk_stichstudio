@@ -31,6 +31,7 @@ import Gallery from './pages/Gallery';
 import Login from './pages/Login';
 import Addtocart from './pages/Addtocart';
 import BookAppointment from './pages/BookAppointment';
+import ProductDetail from './pages/ProductDetail';
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
+        <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/service" element={<Services />} />
         {/* <Route path="/contact" element={<Contact />} /> */}
         <Route path="/gallery" element={<Gallery />} />

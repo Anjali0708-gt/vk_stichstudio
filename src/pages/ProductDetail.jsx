@@ -16,6 +16,7 @@ function ProductDetail() {
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [rating, setRating] = useState(5);
+  const [user, setUser] = useState("");
 const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -63,28 +64,37 @@ setReviews(response.data.reviews || []);
   if (!product) {
     return <h2>Product not found</h2>;
   }
-  const handleSubmitReview = async (e) => {
+ 
+ const handleSubmitReview = async (e) => {
   e.preventDefault();
+
+  if (!user || !comment) {
+    alert("Please enter your name and comment");
+    return;
+  }
 
   try {
     const response = await addReview(id, {
-      user: "Customer",
-      rating,
-      comment,
+      user: user,
+      rating: Number(rating),
+      comment: comment,
     });
 
-    setReviews((prev) => [
+    // Add newly created review to frontend immediately
+    setReviews((prevReviews) => [
       response.data.review,
-      ...prev,
+      ...prevReviews,
     ]);
 
-    setComment("");
+    // Clear form
+    setUser("");
     setRating(5);
+    setComment("");
 
-    alert("Review added successfully");
+    alert("Review added successfully!");
 
   } catch (error) {
-    console.log(error);
+    console.log("Review error:", error);
 
     alert(
       error.response?.data?.message ||
@@ -242,11 +252,68 @@ setReviews(response.data.reviews || []);
               </small>
 
             </div>
+          
 
           ))
         )}
 
       </section>
+      <div className="review-form-container">
+
+  <h2>Submit Your Review</h2>
+
+  <form
+    onSubmit={handleSubmitReview}
+    className="review-form"
+  >
+
+    <div className="form-group">
+      <label>User Name</label>
+
+      <input
+        type="text"
+        value={user}
+        onChange={(e) => setUser(e.target.value)}
+        placeholder="Enter your name"
+      />
+    </div>
+
+
+    <div className="form-group">
+      <label>Rating</label>
+
+      <select
+        value={rating}
+        onChange={(e) => setRating(Number(e.target.value))}
+      >
+        <option value={5}>★★★★★ - 5</option>
+        <option value={4}>★★★★ - 4</option>
+        <option value={3}>★★★ - 3</option>
+        <option value={2}>★★ - 2</option>
+        <option value={1}>★ - 1</option>
+      </select>
+    </div>
+
+
+    <div className="form-group">
+      <label>Comment</label>
+
+      <textarea
+        value={comment}
+        onChange={(e) => setComment(e.target.value)}
+        placeholder="Write your review..."
+        rows="5"
+      />
+    </div>
+
+
+    <button type="submit" className="submit-review-btn">
+      Submit Review
+    </button>
+
+  </form>
+
+</div>
 
     </div>
   );
