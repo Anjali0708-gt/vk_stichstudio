@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getCart, increase, decrease, remove, clearCart } from "../redux/cartSlice";
 
 import { Link, useNavigate } from "react-router-dom";
+import { createCheckoutSession } from "../Api/PayymentApi";
 import "./Addtocart.css";
 import {
   FaTrash,
@@ -35,9 +36,10 @@ function Addtocart() {
   // Derived totals — computed from cartItems in Redux state, not a
   // free-floating `cartTotal` that was never declared anywhere.
   const cartTotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+  (sum, item) =>
+    sum + Number(item.product?.price) * Number(item.quantity),
+  0
+);
 
   const TAX_RATE = 0.05; // 5% GST/taxes
   const taxAmount = cartTotal * TAX_RATE;
@@ -59,13 +61,48 @@ function Addtocart() {
     }
   };
 
-  const handleCheckout = () => {
-    // Simulate order placement
-    const mockOrderId = "ORD-" + Math.floor(100000 + Math.random() * 900000);
-    setOrderId(mockOrderId);
-    setCheckoutComplete(true);
-    dispatch(clearCart());
-  };
+
+
+
+
+const handleCheckout = async () => {
+  try {
+    // Validate cart items
+    if (!cartItems.length) {
+      alert("Your cart is empty.");
+      return;
+    }
+
+    // Use the total already calculated in your component
+    if (!Number.isFinite(grandTotal) || grandTotal <= 0) {
+      alert("Please check your cart prices and quantities.");
+      return;
+    }
+
+    // Call your existing payment API function
+    const response = await createCheckoutSession({
+      amount: grandTotal,
+      currency: "inr",
+    });
+
+    // Redirect to Stripe Checkout
+    if (response.data.success && response.data.url) {
+      window.location.href = response.data.url;
+    } else {
+      alert("Unable to create Stripe checkout session.");
+    }
+  } catch (error) {
+    console.error(
+      "Checkout error:",
+      error.response?.data || error.message
+    );
+
+    alert(
+      error.response?.data?.message ||
+      "Unable to start checkout. Please try again."
+    );
+  }
+};
 
   const handleRemove = (id) => {
     dispatch(remove(id));

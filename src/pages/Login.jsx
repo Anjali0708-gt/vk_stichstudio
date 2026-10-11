@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -22,19 +23,32 @@ function Login() {
     setLoading(true);
 
     try {
-      const user = await login(email, password);
+      // Login API call
+      const data = await login(email, password);
+
+      console.log("Login response:", data);
 
       setSuccess("Login Successful!");
 
-      setTimeout(() => {
-        if (user.role === "admin") {
-          navigate("/dashboard");
-        } else {
-          navigate("/");
-        }
-      }, 1000);
+
+console.log("LOGIN DATA:", data);
+console.log("USER:", data?.user);
+console.log("ROLE:", data?.user?.role);
+
+if (data?.user?.role === "admin") {
+  navigate("/dashboard");
+} else {
+  navigate("/");
+}
+
     } catch (err) {
-      setError(err.message);
+      console.log("Login error:", err);
+
+      setError(
+        err.response?.data?.message ||
+        err.message ||
+        "Login failed"
+      );
     } finally {
       setLoading(false);
     }
@@ -51,10 +65,20 @@ function Login() {
 
         <h2>Welcome Back</h2>
 
-        {error && <div className="alert error">{error}</div>}
-        {success && <div className="alert success">{success}</div>}
+        {error && (
+          <div className="alert error">
+            {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="alert success">
+            {success}
+          </div>
+        )}
 
         <form onSubmit={handleLogin}>
+
           <div className="input-group">
             <label>Email Address</label>
 
@@ -88,6 +112,7 @@ function Login() {
           >
             {loading ? "Processing..." : "Login"}
           </button>
+
         </form>
 
         <div className="demo-box">

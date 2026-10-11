@@ -50,11 +50,15 @@ const normalizeAuthResponse = (payload) => {
 };
 
 export const authService = {
-  login: async (email, password) => {
-    const res = await authApi.login({ email, password });
-    return normalizeAuthResponse(res.data);
-  },
+login: async (email, password) => {
+  const res = await authApi.login({ email, password });
 
+  console.log("API RESPONSE:", res.data);
+  console.log("API USER:", res.data?.user);
+  console.log("API ROLE:", res.data?.user?.role);
+
+  return res.data;
+},
   register: async (userData) => {
     const res = await authApi.signUp(userData);
     return normalizeAuthResponse(res.data);
