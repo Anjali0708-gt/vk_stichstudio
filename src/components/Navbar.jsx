@@ -3,10 +3,26 @@ import './navbar.css';
 import { FaUser, FaShoppingCart, FaSignOutAlt, FaCalendarAlt } from 'react-icons/fa';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { FaSearch } from "react-icons/fa";
 
 function Navbar() {
   const { cartCount } = useCart();
   const { currentUser, logout, isAuthenticated } = useAuth();
+  const [search, setSearch] = useState("");
+const navigate = useNavigate();
+
+const handleSearch = (e) => {
+  e.preventDefault();
+
+  const query = search.trim();
+
+  if (!query) return;
+
+  navigate(`/search?q=${encodeURIComponent(query)}`);
+};
+  
   
 
         console.log("currentUser:", currentUser);
@@ -37,6 +53,20 @@ function Navbar() {
           Contact
         </NavLink>
       </div>
+      
+<form onSubmit={handleSearch} className="search-form">
+  <input
+    type="search"
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+    placeholder="Search suits, shirts, sherwanis..."
+    aria-label="Search products"
+  />
+
+  <button type="submit" aria-label="Search">
+    <FaSearch />
+  </button>
+</form>
 
       <div className="user-section">
         {/* Book Appointment CTA */}
@@ -59,6 +89,8 @@ function Navbar() {
   {currentUser?.name ? currentUser.name.split(' ')[0] : 'Account'}
 </span>     
        </Link>
+       
+
             <button onClick={logout} className="logout-btn" title="Log Out">
               <FaSignOutAlt />
             </button>

@@ -1,198 +1,191 @@
-import { useState } from 'react';
 
-import './Contact.css';
-import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt, FaClock, FaPaperPlane } from 'react-icons/fa';
+import { useState } from "react";
+import { FaMapMarkerAlt, FaEnvelope, FaPhoneAlt } from "react-icons/fa";
+import { addContact } from "../Api/ContactApi";
+import "./Contact.css";
 
 function Contact() {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: ''
+    name: "",
+    email: "",
+    message: "",
   });
-  const [loading, setLoading] = useState(false);
-  const [feedback, setFeedback] = useState({ status: '', message: '' });
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState({
+    type: "",
+    message: "",
+  });
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setFeedback({ status: '', message: '' });
+    setStatus({ type: "", message: "" });
 
-    // try {
-    //   const result = await contactService.submitContactForm(formData);
-    //   if (result.success) {
-    //     setFeedback({ status: 'success', message: result.message });
-    //     setFormData({ name: '', email: '', subject: '', message: '' });
-    //   }
-    // } catch (error) {
-    //   setFeedback({ status: 'error', message: error.message || 'Failed to send message.' });
-    // } finally {
-    //   setLoading(false);
-    // }
+    try {
+      const response = await addContact(formData);
+
+      if (response.data.success === false) {
+        throw new Error(
+          response.data.message || "Failed to send your message."
+        );
+      }
+
+      setStatus({
+        type: "success",
+        message:
+          response.data.message ||
+          "Thank you! Your message has been sent successfully.",
+      });
+
+      setFormData({
+        name: "",
+        email: "",
+        message: "",
+      });
+    } catch (error) {
+      setStatus({
+        type: "error",
+        message:
+          error.response?.data?.message ||
+          error.message ||
+          "Unable to send your message. Please try again.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const contactDetails = [
-    {
-      icon: <FaMapMarkerAlt />,
-      title: "Our Studio",
-      detail: "PremPura Phagwara, India",
-      desc: "Visit us for fabric viewings and fittings."
-    },
-    {
-      icon: <FaPhoneAlt />,
-      title: "Phone & WhatsApp",
-      detail: "+91 9876543210",
-      desc: "Mon-Sat from 10am to 7pm."
-    },
-    {
-      icon: <FaEnvelope />,
-      title: "Email Queries",
-      detail: "info@vkstichstudio.com",
-      desc: "We reply within 24 hours."
-    },
-    {
-      icon: <FaClock />,
-      title: "Opening Hours",
-      detail: "10:00 AM - 08:00 PM",
-      desc: "Sunday Closed."
-    }
-  ];
-
   return (
-    <div className="contact-page">
-      {/* Page Header */}
+    <main className="vk-contact-page">
       <section className="contact-hero">
-        <div className="contact-hero-overlay"></div>
-        <div className="contact-hero-content">
-          <h1>Get In Touch</h1>
-          <p>
-            Have a design in mind or want to consult on bespoke wedding fittings? Message us or visit our studio directly.
-          </p>
-        </div>
+        <span className="contact-eyebrow">WE'RE HERE FOR YOU</span>
+        <h1>Let's Talk <span>Style.</span></h1>
+        <p>
+          Have a question about custom tailoring, fittings, or your order?
+          We'd love to hear from you.
+        </p>
       </section>
 
-      {/* Main Grid Content */}
-      <section className="contact-main-section">
-        <div className="contact-grid-layout">
-          
-          {/* Left Side: Info Cards */}
-          <div className="contact-info-cards-column">
-            <h2>Contact Information</h2>
-            <div className="info-cards-list">
-              {contactDetails.map((item, idx) => (
-                <div key={idx} className="info-detail-card">
-                  <span className="info-card-icon">{item.icon}</span>
-                  <div className="info-card-text">
-                    <h3>{item.title}</h3>
-                    <p className="info-main-detail">{item.detail}</p>
-                    <p className="info-secondary-desc">{item.desc}</p>
-                  </div>
-                </div>
-              ))}
+      <section className="contact-container">
+        <div className="contact-info">
+          <span className="contact-eyebrow">GET IN TOUCH</span>
+          <h2>Let's Create Something Perfect</h2>
+          <p className="contact-description">
+            From everyday essentials to your special occasion outfit,
+            our team is ready to help you find the perfect fit.
+          </p>
+
+          <div className="contact-info-item">
+            <div className="contact-icon">
+              <FaMapMarkerAlt />
+            </div>
+            <div>
+              <h3>Visit Our Studio</h3>
+              <p>VK Stitch Studio</p>
+              <p>Contact us for our shop location.</p>
             </div>
           </div>
 
-          {/* Right Side: Message Form */}
-          <div className="contact-form-card-column">
-            <h2>Send Us a Message</h2>
-            
-            {feedback.message && (
-              <div className={`contact-alert ${feedback.status}`}>
-                {feedback.message}
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="contact-interactive-form">
-              <div className="contact-form-row">
-                <div className="contact-form-group">
-                  <label htmlFor="c-name">Your Name</label>
-                  <input
-                    type="text"
-                    id="c-name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    placeholder="Enter your full name"
-                    required
-                  />
-                </div>
-
-                <div className="contact-form-group">
-                  <label htmlFor="c-email">Email Address</label>
-                  <input
-                    type="email"
-                    id="c-email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    placeholder="Enter your email address"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="contact-form-group">
-                <label htmlFor="c-subject">Subject</label>
-                <input
-                  type="text"
-                  id="c-subject"
-                  name="subject"
-                  value={formData.subject}
-                  onChange={handleInputChange}
-                  placeholder="What is this inquiry about?"
-                  required
-                />
-              </div>
-
-              <div className="contact-form-group">
-                <label htmlFor="c-message">Message / Design Requests</label>
-                <textarea
-                  id="c-message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleInputChange}
-                  placeholder="Describe your design specifications or fitting queries here..."
-                  required
-                />
-              </div>
-
-              <button type="submit" className="contact-submit-btn" disabled={loading}>
-                {loading ? 'Sending Message...' : (
-                  <>
-                    <FaPaperPlane /> Send Message
-                  </>
-                )}
-              </button>
-            </form>
+          <div className="contact-info-item">
+            <div className="contact-icon">
+              <FaEnvelope />
+            </div>
+            <div>
+              <h3>Email Us</h3>
+              <p>Send us your questions using the contact form.</p>
+            </div>
           </div>
 
-        </div>
-      </section>
-
-      {/* Map Placeholder Section */}
-      <section className="studio-map-section">
-        <div className="map-card-wrapper">
-          <div className="map-placeholder-info">
-            <h3>Find Our Studio in Karimpur</h3>
-            <p>Our tailoring house is fully equipped with high-end fabric books and design rooms. Drop in for a coffee and discuss your dream suit/dress.</p>
-          </div>
-          {/* Styled dummy map visualization */}
-          <div className="styled-dummy-map">
-            <div className="map-pin">📍</div>
-            <div className="map-pulse"></div>
-            <span>VK STICH STUDIO, Karimpur, West Bengal</span>
+          <div className="contact-info-item">
+            <div className="contact-icon">
+              <FaPhoneAlt />
+            </div>
+            <div>
+              <h3>Need Assistance?</h3>
+              <p>Send a message and our team can get back to you.</p>
+            </div>
           </div>
         </div>
+
+        <div className="contact-form-card">
+          <h2>Send Us a Message</h2>
+          <p className="contact-form-subtitle">
+            Fill in the details below and we'll receive your message.
+          </p>
+
+          {status.message && (
+            <div
+              className={`contact-alert ${status.type}`}
+              role="status"
+            >
+              {status.message}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            <div className="contact-field">
+              <label htmlFor="contact-name">Full Name</label>
+              <input
+                id="contact-name"
+                type="text"
+                name="name"
+                placeholder="Enter your full name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                minLength={2}
+                maxLength={100}
+              />
+            </div>
+
+            <div className="contact-field">
+              <label htmlFor="contact-email">Email Address</label>
+              <input
+                id="contact-email"
+                type="email"
+                name="email"
+                placeholder="you@example.com"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                maxLength={254}
+              />
+            </div>
+
+            <div className="contact-field">
+              <label htmlFor="contact-message">Your Message</label>
+              <textarea
+                id="contact-message"
+                name="message"
+                placeholder="Tell us how we can help..."
+                rows={5}
+                value={formData.message}
+                onChange={handleChange}
+                required
+                minLength={5}
+                maxLength={3000}
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="contact-submit-btn"
+              disabled={loading}
+            >
+              {loading ? "SENDING..." : "SEND MESSAGE"}
+            </button>
+          </form>
+        </div>
       </section>
-    </div>
+    </main>
   );
 }
 

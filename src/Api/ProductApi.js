@@ -1,6 +1,15 @@
 import API from "./axios";
 
-export const getProducts = () => API.get("/product");   
+// export const getProducts = () => API.get("/product");
+
+
+
+// Fetch all products or search by keyword
+export const getProducts = (search = "") =>
+  API.get("/product", {
+    params: search.trim() ? { search: search.trim() } : {}
+  });
+
 
 export const getProductById = (id) => API.get(`/product/${id}`);
 
