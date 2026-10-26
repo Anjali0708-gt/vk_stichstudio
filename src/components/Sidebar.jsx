@@ -18,7 +18,7 @@ function Sidebar() {
         </li>
 
         <li>
-          <NavLink to="/customers">
+          <NavLink to="/admin/customers">
             <FaUser /> Customers
           </NavLink>
         </li>

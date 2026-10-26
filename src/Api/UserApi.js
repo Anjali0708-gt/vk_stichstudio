@@ -15,6 +15,10 @@ export const forgotPassword = (data) =>
 // Reset Password
 export const resetPassword = (data) =>
   API.put("/customer/resetpassword", data);
+// Update Customer (Protected)
+
+export const updateCustomer = (id, data) =>
+  API.put(`/customer/update/${id}`, data);
 
 // Get All Customers (Protected)
 export const getCustomers = () =>

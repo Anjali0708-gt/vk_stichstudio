@@ -1,63 +1,198 @@
-import React from "react";
+
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Sidebar from "../../components/Sidebar";
 import StatCard from "../../components/StatCard";
-import QuickAction from "../../components/QuickAction";
 import RecentOrder from "../../components/RecentOrder";
+import OrdersTable from "../../components/OrdersTable";
+
+import { getOrders, updateOrder } from "../../Api/orderApi";
+import { getCustomers } from "../../Api/UserApi";
+import { getAvailableSlots } from "../../Api/appointmentApi";
 
 import "./AdminDashboard.css";
 
-/* ------------------------------------------------------------------
-   Sample data. Replace with your API calls (src/Api) when ready,
-   e.g. useEffect(() => { OrderApi.getAll().then(setOrders) }, []).
-------------------------------------------------------------------- */
-const stats = [
-  { id: "orders", title: "Orders in progress", value: 24, note: "6 due this week" },
-  { id: "appointments", title: "Appointments today", value: 7, note: "Next at 11:30 AM" },
-  { id: "customers", title: "Customers", value: 312, note: "9 new this month" },
-  { id: "revenue", title: "Revenue this month", value: "₹1,84,500", note: "₹32,000 pending" },
-];
-
-const recentOrders = [
-  { id: "#VK-1042", customer: "Anjali Sharma", status: "Stitching" },
-  { id: "#VK-1041", customer: "Rohit Verma", status: "Ready for trial" },
-  { id: "#VK-1040", customer: "Simran Kaur", status: "Cutting" },
-  { id: "#VK-1039", customer: "Mehak Gill", status: "Delivered" },
-  { id: "#VK-1038", customer: "Karan Malhotra", status: "Pending payment" },
-];
-
-const appointments = [
-  { id: 1, time: "10:00 AM", name: "Priya Bansal", type: "Measurement" },
-  { id: 2, time: "11:30 AM", name: "Harpreet Singh", type: "Trial fitting" },
-  { id: 3, time: "02:00 PM", name: "Neha Arora", type: "Consultation" },
-  { id: 4, time: "04:30 PM", name: "Gurleen Kaur", type: "Delivery" },
-];
-
-const weeklyRevenue = [
-  { day: "Mon", amount: 18000 },
-  { day: "Tue", amount: 26500 },
-  { day: "Wed", amount: 12000 },
-  { day: "Thu", amount: 31000 },
-  { day: "Fri", amount: 24500 },
-  { day: "Sat", amount: 38000 },
-  { day: "Sun", amount: 9500 },
-];
-
-/* Change the paths to match your router. */
 const quickActions = [
-  { id: "new-order", label: "New order", path: "/admin/orders" },
-  { id: "book", label: "Book appointment", path: "/admin/appointments" },
-  { id: "measure", label: "Add measurements", path: "/admin/measurements" },
-  { id: "payment", label: "Record payment", path: "/admin/payments" },
-  { id: "product", label: "Add product", path: "/admin/products" },
-  { id: "report", label: "View reports", path: "/admin/reports" },
+  { id: "new-order", label: "New Order", path: "/orders" },
+  { id: "book", label: "Appointments", path: "/appointments" },
+  { id: "measure", label: "Measurements", path: "/measurements" },
+  { id: "product", label: "Add Product", path: "/products" },
+  { id: "report", label: "View Reports", path: "/reports" },
 ];
+
+const getArray = (response, key) => {
+  const data = response?.data;
+
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.[key])) return data[key];
+  if (Array.isArray(data?.data)) return data.data;
+
+  return [];
+};
+
+const formatCurrency = (amount) =>
+  `₹${Number(amount || 0).toLocaleString("en-IN")}`;
+
+const getOrderId = (order) =>
+  order.orderNumber || order.orderId || order._id || order.id;
+
+const getCustomerName = (order) =>
+  order.customerName ||
+  order.customer?.name ||
+  order.customer?.fullName ||
+  order.customer ||
+  order.name ||
+  "Customer";
+
+const getOrderPrice = (order) =>
+  Number(
+    order.totalAmount ??
+      order.totalPrice ??
+      order.amount ??
+      order.total ??
+      order.price ??
+      0
+  );
 
 function AdminDashboard() {
   const navigate = useNavigate();
-  const maxRevenue = Math.max(...weeklyRevenue.map((d) => d.amount));
-  const weekTotal = weeklyRevenue.reduce((sum, d) => sum + d.amount, 0);
+
+  const [orders, setOrders] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [appointments, setAppointments] = useState([]);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function fetchDashboardData() {
+      setLoading(true);
+      setError("");
+
+      const today = new Date().toLocaleDateString("en-CA");
+
+      const results = await Promise.allSettled([
+        getOrders(),
+        getCustomers(),
+        getAvailableSlots(today),
+      ]);
+
+      if (!isMounted) return;
+
+      if (results[0].status === "fulfilled") {
+        setOrders(
+          getArray(results[0].value, "orders").map((order) => ({
+            ...order,
+            id: String(getOrderId(order)),
+            customer: getCustomerName(order),
+            type:
+              order.type ||
+              order.orderType ||
+              order.service ||
+              "Tailoring",
+            status: order.status || "Pending",
+            price: getOrderPrice(order),
+            date: order.createdAt
+              ? new Date(order.createdAt).toLocaleDateString("en-IN")
+              : "—",
+            dueDate: order.dueDate
+              ? new Date(order.dueDate).toLocaleDateString("en-IN")
+              : "—",
+          }))
+        );
+      }
+
+      if (results[1].status === "fulfilled") {
+        setCustomers(getArray(results[1].value, "customers"));
+      }
+
+      if (results[2].status === "fulfilled") {
+        setAppointments(
+          getArray(results[2].value, "appointments").length
+            ? getArray(results[2].value, "appointments")
+            : getArray(results[2].value, "slots")
+        );
+      }
+
+      if (results.some((result) => result.status === "rejected")) {
+        setError(
+          "Some dashboard information could not be loaded. Please check your backend API."
+        );
+      }
+
+      setLoading(false);
+    }
+
+    fetchDashboardData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleStatusChange = async (orderId, newStatus) => {
+    const previousOrders = orders;
+
+    setOrders((currentOrders) =>
+      currentOrders.map((order) =>
+        order.id === String(orderId)
+          ? { ...order, status: newStatus }
+          : order
+      )
+    );
+
+    try {
+      await updateOrder(orderId, { status: newStatus });
+    } catch (err) {
+      setOrders(previousOrders);
+      setError(
+        err?.response?.data?.message ||
+          "Failed to update order status. Please try again."
+      );
+    }
+  };
+
+  const pendingOrders = orders.filter((order) =>
+    ["Pending", "In Progress", "Stitching", "Cutting", "Ready for trial"].includes(
+      order.status
+    )
+  ).length;
+
+  const totalOrderValue = orders
+    .filter((order) => order.status !== "Cancelled")
+    .reduce((sum, order) => sum + order.price, 0);
+
+  const stats = [
+    {
+      id: "orders",
+      title: "Total Orders",
+      value: orders.length,
+    },
+    {
+      id: "pending",
+      title: "Orders in Progress",
+      value: pendingOrders,
+    },
+    {
+      id: "customers",
+      title: "Total Customers",
+      value: customers.length,
+    },
+    {
+      id: "revenue",
+      title: "Total Order Value",
+      value: formatCurrency(totalOrderValue),
+    },
+  ];
+
+  const recentOrders = [...orders].slice(-5).reverse().map((order) => ({
+    id: order.id,
+    customer: order.customer,
+    status: order.status,
+  }));
 
   return (
     <div className="admin-layout">
@@ -67,100 +202,128 @@ function AdminDashboard() {
         <header className="admin-header">
           <div>
             <h1>Dashboard</h1>
-            <p>Here is what is happening at VK Stitch Studio today.</p>
+            <p>
+              Here is what is happening at VK Stitch Studio today.
+            </p>
           </div>
+
           <button
             type="button"
             className="admin-primary-btn"
-            onClick={() => navigate("/admin/orders")}
+            onClick={() => navigate("/orders")}
           >
-            New order
+            + New Order
           </button>
         </header>
 
-        {/* Stats */}
-        <section className="admin-stats" aria-label="Key numbers">
-          {stats.map((s) => (
-            <StatCard
-              key={s.id}
-              title={s.title}
-              value={s.value}
-              note={s.note}
-            />
-          ))}
-        </section>
-
-        {/* Orders + appointments */}
-        <section className="admin-grid">
-          <div className="admin-panel admin-panel--wide">
-            <RecentOrder orders={recentOrders} />
-            <button
-              type="button"
-              className="admin-link-btn"
-              onClick={() => navigate("/admin/orders")}
-            >
-              See all orders
-            </button>
+        {error && (
+          <div className="dashboard-error" role="alert">
+            {error}
           </div>
+        )}
 
-          <div className="admin-panel">
-            <h2>Today's appointments</h2>
-            <ul className="appt-list">
-              {appointments.map((a) => (
-                <li key={a.id}>
-                  <span className="appt-time">{a.time}</span>
-                  <span className="appt-info">
-                    <strong>{a.name}</strong>
-                    <small>{a.type}</small>
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <button
-              type="button"
-              className="admin-link-btn"
-              onClick={() => navigate("/admin/appointments")}
-            >
-              Open calendar
-            </button>
-          </div>
-        </section>
-
-        {/* Revenue + quick actions */}
-        <section className="admin-grid">
-          <div className="admin-panel admin-panel--wide">
-            <div className="panel-head">
-              <h2>Revenue this week</h2>
-              <span className="panel-total">₹{weekTotal.toLocaleString("en-IN")}</span>
-            </div>
-            <div className="bars" role="img" aria-label="Bar chart of daily revenue for this week">
-              {weeklyRevenue.map((d) => (
-                <div className="bar-col" key={d.day}>
-                  <div
-                    className="bar"
-                    style={{ height: `${(d.amount / maxRevenue) * 100}%` }}
-                    title={`₹${d.amount.toLocaleString("en-IN")}`}
-                  />
-                  <span>{d.day}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="admin-panel">
-            <h2>Quick actions</h2>
-            <div className="quick-actions">
-              {quickActions.map((q) => (
-                <QuickAction
-                  key={q.id}
-                  label={q.label}
-                  title={q.label}
-                  onClick={() => navigate(q.path)}
+        {loading ? (
+          <p className="dashboard-loading">Loading dashboard...</p>
+        ) : (
+          <>
+            <section className="admin-stats" aria-label="Dashboard statistics">
+              {stats.map((stat) => (
+                <StatCard
+                  key={stat.id}
+                  title={stat.title}
+                  value={stat.value}
                 />
               ))}
-            </div>
-          </div>
-        </section>
+            </section>
+
+            <section className="admin-grid">
+              <div className="admin-panel admin-panel--wide">
+                <RecentOrder orders={recentOrders} />
+
+                <button
+                  type="button"
+                  className="admin-link-btn"
+                  onClick={() => navigate("/orders")}
+                >
+                  See All Orders →
+                </button>
+              </div>
+
+              <div className="admin-panel">
+                <h2>Today's Appointments</h2>
+
+                {appointments.length ? (
+                  <ul className="appt-list">
+                    {appointments.slice(0, 5).map((appointment, index) => (
+                      <li key={appointment._id || appointment.id || index}>
+                        <span className="appt-time">
+                          {appointment.time ||
+                            appointment.slot ||
+                            appointment.startTime ||
+                            "Time not set"}
+                        </span>
+
+                        <span className="appt-info">
+                          <strong>
+                            {appointment.customerName ||
+                              appointment.customer?.name ||
+                              appointment.name ||
+                              "Available slot"}
+                          </strong>
+                          <small>
+                            {appointment.type ||
+                              appointment.service ||
+                              appointment.status ||
+                              "Appointment"}
+                          </small>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>No appointment records found.</p>
+                )}
+
+                <button
+                  type="button"
+                  className="admin-link-btn"
+                  onClick={() => navigate("/appointments")}
+                >
+                  Open Appointments →
+                </button>
+              </div>
+            </section>
+
+            <section className="admin-grid">
+              <div className="admin-panel admin-panel--wide">
+                <h2>Manage Orders</h2>
+
+                <OrdersTable
+                  orders={orders}
+                  onStatusChange={handleStatusChange}
+                  compact
+                />
+              </div>
+
+              <div className="admin-panel">
+                <h2>Quick Actions</h2>
+
+                <div className="quick-actions">
+                  {quickActions.map((action) => (
+                    <button
+                      type="button"
+                      key={action.id}
+                      className="quick-action-btn"
+                      onClick={() => navigate(action.path)}
+                    >
+                      {action.label} →
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </section>
+          </>
+        )}
       </main>
     </div>
   );

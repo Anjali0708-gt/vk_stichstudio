@@ -17,6 +17,7 @@ import AdminDashboard from './pages/Admin/AdminDashboard';
 import Contact from './pages/Contact';
 import PaymentSuccess from "./pages/PaymentSucess";
 import SearchResults from "./pages/SearchResults";
+import Customers from "./pages/Admin/Customers";
 
 
 
@@ -44,6 +45,10 @@ function App() {
 
         {/* Admin Dashboard */}
         <Route path="/dashboard" element={<AdminDashboard />} />
+        <Route
+  path="/admin/customers"
+  element={<Customers />}
+/>
       </Routes>
 
       <Footer />
