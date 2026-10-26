@@ -7,9 +7,9 @@ import StatCard from "../../components/StatCard";
 import RecentOrder from "../../components/RecentOrder";
 import OrdersTable from "../../components/OrdersTable";
 
-import { getOrders, updateOrder } from "../../Api/orderApi";
+import { getOrders, updateOrder } from "../../Api/OrderApi";
 import { getCustomers } from "../../Api/UserApi";
-import { getAvailableSlots } from "../../Api/appointmentApi";
+import { getAvailableSlots } from "../../Api/AppointmentApi";
 
 import "./AdminDashboard.css";
 

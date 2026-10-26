@@ -5,7 +5,7 @@ import {
   signUp,
   updateCustomer,
   deleteCustomer,
-} from "../../api/UserApi";
+} from "../../Api/UserApi";
 import "./Customer.css";
 
 const emptyForm = {
