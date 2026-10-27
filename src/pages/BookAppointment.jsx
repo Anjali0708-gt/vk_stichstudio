@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { bookingService } from '../services/bookingService';
 import { useAuth } from '../context/AuthContext';
 import './BookAppointment.css';
+import { getServices } from "../Api/Serviceapi";
 
 import {
   FaUser,
@@ -49,24 +50,33 @@ const [servicesLoading, setServicesLoading] = useState(false);
   // SERVICES
   // Men's Tailoring Services
   // --------------------------------------------------
+
 useEffect(() => {
   const loadServices = async () => {
     try {
       setServicesLoading(true);
+      setError("");
 
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/services`
+      const response = await getServices();
+
+      const serviceList = Array.isArray(response.data)
+        ? response.data
+        : response.data?.services || [];
+
+      setServices(
+        serviceList.filter((service) => service.active !== false)
+      );
+    } catch (error) {
+      console.error(
+        "Error loading services:",
+        error.response?.data || error.message
       );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to load services");
-      }
-
-      setServices(data.services || data);
-    } catch (error) {
-      setError(error.message);
+      setServices([]);
+      setError(
+        error.response?.data?.message ||
+        "Failed to load services. Please try again."
+      );
     } finally {
       setServicesLoading(false);
     }

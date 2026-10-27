@@ -17,6 +17,7 @@
 /* =====================================================
    HERO
 ===================================================== */
+
 .hero {
   min-height: 560px;
 
@@ -42,7 +43,6 @@
 
   color: white;
 
-  /* MOVE EVERYTHING TO RIGHT */
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -62,7 +62,6 @@
   font-size: clamp(40px, 3vw, 22px);
   line-height: 1.08;
   margin: 18px 0;
-  
   font-weight: 500;
 }
 
@@ -81,6 +80,7 @@
   margin-top: 30px;
   flex-wrap: wrap;
 }
+
 .primary,
 .secondary {
   border: none;
@@ -177,7 +177,6 @@
   background: white;
 
   padding: 30px 22px;
-
   min-height: 210px;
 
   text-align: center;
@@ -186,7 +185,6 @@
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
 
   transition: 0.3s;
-
   cursor: pointer;
 }
 
@@ -207,7 +205,6 @@
   justify-content: center;
 
   color: #d4af37;
-
   font-size: 30px;
 
   border: 1px solid #d4af37;
@@ -248,37 +245,46 @@
 
 
 /* =====================================================
-   DESIGNER COLLECTION
+   DESIGNER COLLECTION  (single, clean version)
+   Cards per screen is controlled by --cards:
+     desktop 3  |  tablet 2  |  phone 1.15 (shows a peek of the next card)
 ===================================================== */
 
 .collection-section {
+  width: 100%;
   padding: 80px 5%;
-  background: white;
-
+  background: #fff;
   text-align: center;
+  overflow: hidden;
 }
 
 .collection-wrapper {
-  max-width: 1250px;
-  margin: auto;
+  --cards: 3;
+  --gap: 20px;
 
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
   position: relative;
-  display: flex;
-  align-items: center;
 }
 
-.collection-slider {
-  width: 100%;
 
+/* SLIDER */
+
+.collection-slider {
   display: flex;
-  gap: 18px;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: var(--gap);
 
   overflow-x: auto;
+  overflow-y: hidden;
+
+  padding: 10px 4px 25px;
 
   scroll-behavior: smooth;
   scroll-snap-type: x mandatory;
-
-  padding: 10px 5px 25px;
+  -webkit-overflow-scrolling: touch;
 
   scrollbar-width: none;
 }
@@ -288,99 +294,118 @@
 }
 
 
-/* IMAGE CARD */
+/* CARD: size follows the screen, ratio stays the same */
 
 .collection-card {
-  flex: 0 0 calc((100% - 36px) / 3);
-
-  height: 360px;
-
   position: relative;
+
+  flex: 0 0 calc((100% - (var(--cards) - 1) * var(--gap)) / var(--cards));
+  aspect-ratio: 3 / 4;
 
   overflow: hidden;
 
+  border-radius: 8px;
+  border: 1px solid #eee;
+  background: #f3f1ea;
+
   scroll-snap-align: start;
 
-  background: #eee;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 
-  border-radius: 7px;
-
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
 }
 
+/* IMAGE: fills the whole card, no empty side bars, keeps faces in view */
+
 .collection-card img {
+  position: absolute;
+  inset: 0;
+
   width: 100%;
   height: 100%;
+  max-width: none;
 
   object-fit: cover;
+  object-position: center top;
 
   display: block;
+  margin: 0;
 
-  transition: transform 0.6s ease;
+  transition: transform 0.7s ease;
 }
 
 .collection-card:hover img {
-  transform: scale(1.07);
+  transform: scale(1.05);
 }
 
 
-/* IMAGE DARK GRADIENT */
+/* Soft gradient only at the bottom so the name is readable */
 
 .collection-overlay {
   position: absolute;
-
   inset: 0;
+  z-index: 1;
 
   background:
     linear-gradient(
       to top,
-      rgba(0, 0, 0, 0.78),
-      rgba(0, 0, 0, 0.05) 55%,
-      transparent
+      rgba(0, 0, 0, 0.75) 0%,
+      rgba(0, 0, 0, 0.25) 25%,
+      rgba(0, 0, 0, 0) 50%
     );
 
   pointer-events: none;
 }
 
 
-/* PRODUCT NAME BOTTOM LEFT */
+/* PRODUCT NAME */
 
 .collection-name {
   position: absolute;
-
   left: 20px;
-  bottom: 18px;
+  right: 20px;
+  bottom: 20px;
+  z-index: 5;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+
+  padding: 0;
 
   border: none;
+  outline: none;
   background: transparent;
 
   color: white;
 
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 18px;
+  text-align: left;
 
   cursor: pointer;
 
-  font-family: Georgia, serif;
-  font-size: 18px;
-
-  padding: 0;
-
-  z-index: 3;
-
   transition: 0.3s;
+}
+
+.collection-name span {
+  position: relative;
+
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .collection-name::after {
   content: "";
 
   position: absolute;
-
   left: 0;
-  bottom: -7px;
+  bottom: -8px;
 
-  width: 35px;
+  width: 30px;
   height: 2px;
 
   background: #d4af37;
@@ -389,44 +414,47 @@
 }
 
 .collection-name svg {
-  color: #d4af37;
+  flex-shrink: 0;
 
+  color: #d4af37;
   font-size: 13px;
 
-  transition: 0.3s;
+  transition: transform 0.3s;
 }
 
-.collection-name:hover {
+.collection-name:hover,
+.collection-card:hover .collection-name {
   color: #d4af37;
 }
 
-.collection-name:hover svg {
-  transform: translateX(5px);
-}
-
-.collection-name:hover::after {
+.collection-name:hover::after,
+.collection-card:hover .collection-name::after {
   width: 100%;
 }
 
+.collection-name:hover svg,
+.collection-card:hover .collection-name svg {
+  transform: translateX(5px);
+}
 
-/* SLIDER ARROWS */
 
-.slider-arrow {
+/* ARROWS */
+
+.collection-arrow {
   position: absolute;
 
-  top: 50%;
-
+  top: calc(50% - 12px);
   transform: translateY(-50%);
 
-  width: 42px;
-  height: 42px;
+  z-index: 10;
+
+  width: 46px;
+  height: 46px;
 
   border-radius: 50%;
-
   border: 1px solid #d4af37;
 
-  background: white;
-
+  background: #fff;
   color: #222;
 
   display: flex;
@@ -435,52 +463,51 @@
 
   cursor: pointer;
 
-  z-index: 10;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.18);
 
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-
-  transition: 0.3s;
+  transition: all 0.3s ease;
 }
 
-.slider-arrow:hover {
+.collection-arrow:hover {
   background: #d4af37;
-  color: white;
+  color: #fff;
+  transform: translateY(-50%) scale(1.08);
 }
 
-.slider-left {
-  left: -20px;
+.collection-arrow-left {
+  left: -23px;
 }
 
-.slider-right {
-  right: -20px;
+.collection-arrow-right {
+  right: -23px;
 }
 
 
 /* VIEW ALL BUTTON */
 
-.view-all-btn {
-  margin-top: 25px;
+.collection-view-all {
+  margin-top: 28px;
 
-  background: transparent;
-
-  border: 1px solid #222;
-
-  padding: 12px 25px;
+  padding: 13px 25px;
 
   display: inline-flex;
   align-items: center;
   gap: 10px;
 
-  cursor: pointer;
+  background: transparent;
+  border: 1px solid #222;
+  color: #222;
 
   font-size: 13px;
+
+  cursor: pointer;
 
   transition: 0.3s;
 }
 
-.view-all-btn:hover {
+.collection-view-all:hover {
   background: #111;
-  color: white;
+  color: #fff;
 }
 
 .empty-gallery {
@@ -515,7 +542,6 @@
   background: white;
 
   border: 1px solid #eee;
-
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
 
   transition: 0.3s;
@@ -539,7 +565,6 @@
   border-radius: 50%;
 
   background: #faf6e8;
-
   color: #c59d27;
 
   font-size: 18px;
@@ -563,7 +588,6 @@
 
 .reviews-section {
   padding: 75px 5%;
-
   background: #f8f7f3;
 }
 
@@ -573,7 +597,6 @@
   background: white;
 
   border: 1px solid #eee;
-
   box-shadow: 0 7px 20px rgba(0, 0, 0, 0.05);
 
   text-align: center;
@@ -593,17 +616,13 @@
 
 .review-card p {
   color: #555;
-
   font-size: 13px;
-
   line-height: 1.7;
 }
 
 .review-card h4 {
   font-family: Georgia, serif;
-
   font-weight: normal;
-
   margin-top: 18px;
 }
 
@@ -639,19 +658,14 @@
 
 .contact-content h2 {
   font-family: Georgia, serif;
-
   font-size: 45px;
-
   font-weight: 500;
-
   margin: 12px 0;
 }
 
 .contact-content p {
   color: #ddd;
-
   line-height: 1.7;
-
   margin-bottom: 25px;
 }
 
@@ -664,6 +678,7 @@
    RESPONSIVE
 ===================================================== */
 
+/* Tablet */
 @media (max-width: 900px) {
 
   .services-grid {
@@ -674,16 +689,22 @@
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .collection-card {
-    flex: 0 0 calc((100% - 18px) / 2);
+  .collection-wrapper {
+    --cards: 2;
+    --gap: 16px;
   }
 
-  .slider-left {
-    left: -10px;
+  .collection-arrow {
+    width: 40px;
+    height: 40px;
   }
 
-  .slider-right {
-    right: -10px;
+  .collection-arrow-left {
+    left: -14px;
+  }
+
+  .collection-arrow-right {
+    right: -14px;
   }
 
   .hero h1 {
@@ -692,6 +713,7 @@
 }
 
 
+/* Phone */
 @media (max-width: 600px) {
 
   .hero {
@@ -706,6 +728,11 @@
     font-size: 14px;
   }
 
+  .hero-buttons {
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
   .services-grid {
     grid-template-columns: 1fr;
   }
@@ -714,18 +741,12 @@
     grid-template-columns: 1fr;
   }
 
-  .collection-card {
-    flex: 0 0 85%;
-    height: 350px;
-  }
-
-  .slider-arrow {
-    width: 36px;
-    height: 36px;
-  }
-
   .section-heading {
     gap: 10px;
+  }
+
+  .section-heading h2 {
+    font-size: 24px;
   }
 
   .heading-line {
@@ -736,393 +757,48 @@
     font-size: 35px;
   }
 
-  .hero-buttons {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-}
-/* =====================================================
-   VK STITCH STUDIO - PREMIUM COLLECTION FIX
-   Put this at the VERY END of Home.css
-===================================================== */
-
-.collection-section {
-  width: 100%;
-  padding: 90px 5%;
-  background: #ffffff;
-  text-align: center;
-  overflow: hidden;
-}
-
-.collection-section .section-heading {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 22px;
-  margin: 0 auto 45px;
-}
-
-.collection-section .section-heading > div {
-  text-align: center;
-}
-
-.collection-section .section-heading h2 {
-  margin: 6px 0 0 !important;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 30px !important;
-  font-weight: 500;
-  color: #151515;
-}
-
-.collection-section .heading-small {
-  display: block;
-  font-size: 10px;
-  letter-spacing: 3px;
-  color: #b08b20;
-  font-weight: 600;
-}
-
-.collection-section .heading-line {
-  width: 60px;
-  height: 1px;
-  background: #d4af37;
-  display: block;
-}
-
-
-/* ===============================
-   SLIDER CONTAINER
-================================ */
-
-.collection-section .collection-wrapper {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  position: relative;
-  display: block;
-}
-
-
-/* ===============================
-   ACTUAL SLIDER
-================================ */
-
-.collection-section .collection-slider {
-  width: 100%;
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
-
-  gap: 20px;
-
-  overflow-x: auto;
-  overflow-y: hidden;
-
-  padding: 10px 5px 25px;
-
-  scroll-behavior: smooth;
-  scroll-snap-type: x mandatory;
-
-  scrollbar-width: none;
-}
-
-.collection-section .collection-slider::-webkit-scrollbar {
-  display: none;
-}
-
-
-/* ===============================
-   EACH IMAGE CARD
-================================ */
-
-.collection-section .collection-slider .collection-card {
-  position: relative;
-
-  flex: 0 0 calc((100% - 40px) / 3) !important;
-
-  width: calc((100% - 40px) / 3) !important;
-  min-width: calc((100% - 40px) / 3) !important;
-
-  height: 400px !important;
-
-  overflow: hidden;
-
-  border-radius: 8px;
-
-  background: #F8F7F3;
-
-  scroll-snap-align: start;
-
-  box-shadow:
-    0 8px 25px rgba(0, 0, 0, 0.10);
-
-  border: 1px solid #eeeeee;
-
-  cursor: pointer;
-}
-
-
-/* ===============================
-   IMAGE
-================================ */
-
-.collection-section .collection-slider .collection-card img {
-  position: absolute !important;
-
-  inset: 0 !important;
-
-  width: 100% !important;
-  height: 100% !important;
-
-  max-width: none !important;
-
-  object-fit: contain !important;
-
-  display: block !important;
-
-  margin: 0 !important;
-
-  transition: transform 0.7s ease;
-}
-
-.collection-section
-.collection-slider
-.collection-card:hover img {
-  transform: scale(1.035);
-}
-
-
-/* ===============================
-   DARK IMAGE GRADIENT
-================================ */
-
-.collection-section .collection-overlay {
-  position: absolute;
-
-  inset: 0;
-
-  z-index: 1;
-
-  background:
-    linear-gradient(
-      to top,
-      rgba(0, 0, 0, 0.85) 0%,
-      rgba(0, 0, 0, 0.25) 45%,
-      rgba(0, 0, 0, 0) 75%
-    );
-
-  pointer-events: none;
-}
-
-
-/* ===============================
-   PRODUCT NAME
-================================ */
-
-.collection-section .collection-name {
-  position: absolute;
-
-  left: 22px;
-  bottom: 22px;
-
-  z-index: 5;
-
-  display: flex;
-  align-items: center;
-  gap: 12px;
-
-  padding: 0;
-
-  border: none;
-  outline: none;
-
-  background: transparent;
-
-  color: white;
-
-  font-family: Georgia, "Times New Roman", serif;
-
-  font-size: 18px;
-
-  cursor: pointer;
-
-  transition: 0.3s;
-}
-
-.collection-section .collection-name span {
-  position: relative;
-}
-
-.collection-section .collection-name span::after {
-  content: "";
-
-  position: absolute;
-
-  left: 0;
-  bottom: -8px;
-
-  width: 30px;
-  height: 2px;
-
-  background: #d4af37;
-
-  transition: 0.3s;
-}
-
-.collection-section .collection-name svg {
-  color: #d4af37;
-
-  font-size: 13px;
-
-  transition: transform 0.3s;
-}
-
-.collection-section .collection-name:hover,
-.collection-section .collection-card:hover .collection-name {
-  color: #d4af37;
-}
-
-.collection-section .collection-name:hover span::after,
-.collection-section .collection-card:hover .collection-name span::after {
-  width: 100%;
-}
-
-.collection-section .collection-name:hover svg,
-.collection-section .collection-card:hover .collection-name svg {
-  transform: translateX(5px);
-}
-
-
-/* ===============================
-   ARROWS
-================================ */
-
-.collection-section .collection-arrow {
-  position: absolute;
-
-  top: 50%;
-  transform: translateY(-50%);
-
-  z-index: 10;
-
-  width: 46px;
-  height: 46px;
-
-  border-radius: 50%;
-
-  border: 1px solid #d4af37;
-
-  background: #ffffff;
-
-  color: #222;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  cursor: pointer;
-
-  box-shadow:
-    0 5px 18px rgba(0, 0, 0, 0.18);
-
-  transition: all 0.3s ease;
-}
-
-.collection-section .collection-arrow:hover {
-  background: #d4af37;
-  color: white;
-  transform: translateY(-50%) scale(1.08);
-}
-
-.collection-section .collection-arrow-left {
-  left: -23px;
-}
-
-.collection-section .collection-arrow-right {
-  right: -23px;
-}
-
-
-/* ===============================
-   VIEW COLLECTION BUTTON
-================================ */
-
-.collection-section .collection-view-all {
-  margin-top: 28px;
-
-  padding: 13px 25px;
-
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-
-  background: transparent;
-
-  border: 1px solid #222;
-
-  color: #222;
-
-  font-size: 13px;
-
-  cursor: pointer;
-
-  transition: 0.3s;
-}
-
-.collection-section .collection-view-all:hover {
-  background: #111;
-  color: white;
-}
-
-
-/* =====================================================
-   MOBILE
-===================================================== */
-
-@media (max-width: 900px) {
-
-  .collection-section .collection-slider .collection-card {
-    flex: 0 0 calc((100% - 20px) / 2) !important;
-    width: calc((100% - 20px) / 2) !important;
-    min-width: calc((100% - 20px) / 2) !important;
-  }
-
-}
-
-
-@media (max-width: 600px) {
+  /* Collection on phones: one big card with a peek of the next one */
 
   .collection-section {
-    padding: 65px 20px;
+    padding: 65px 12px;
   }
 
-  .collection-section .section-heading {
-    gap: 10px;
+  /* one photo at a time, centered, with the < > arrows on the left and right */
+  .collection-wrapper {
+    --cards: 1;
+    --gap: 14px;
+
+    padding: 0 42px;
   }
 
-  .collection-section .heading-line {
-    width: 30px;
+  .collection-slider {
+    padding: 6px 0 20px;
   }
 
-  .collection-section .section-heading h2 {
-    font-size: 24px !important;
+  .collection-card {
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
   }
 
-  .collection-section .collection-slider .collection-card {
-    flex: 0 0 85% !important;
-    width: 85% !important;
-    min-width: 85% !important;
-    height: 370px !important;
+  .collection-name {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    font-size: 16px;
   }
 
-  .collection-section .collection-arrow-left {
-    left: -10px;
+  /* arrows sit outside the photo, in the side space */
+  .collection-arrow {
+    width: 34px;
+    height: 34px;
+    font-size: 12px;
   }
 
-  .collection-section .collection-arrow-right {
-    right: -10px;
+  .collection-arrow-left {
+    left: 2px;
   }
 
+  .collection-arrow-right {
+    right: 2px;
+  }
 }

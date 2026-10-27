@@ -34,7 +34,7 @@ function Footer() {
           <h3>Our Services</h3>
           <ul>
             <li>Custom Tailoring</li>
-            <li>Bridal Wear</li>
+            <li>wedding Wear</li>
             <li>Men's Suits</li>
             <li>Alteration Services</li>
             <li>Uniform Stitching</li>
@@ -46,11 +46,11 @@ function Footer() {
           <h3>Contact Us</h3>
 
           <p>
-            <MdLocationOn /> Karimpur, West Bengal
+            <MdLocationOn /> prem pura,phagwara, punjab
           </p>
 
           <p>
-            <FaPhoneAlt /> +91 9876543210
+            <FaPhoneAlt /> +91 9914072452
           </p>
 
           <p>

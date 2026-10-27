@@ -1,34 +1,72 @@
+/* =====================================================
+   FOOTER
+   (resets text-align / padding that the global
+   "footer" rule in navbar.css was forcing)
+===================================================== */
+
 .footer {
   background: #111;
   color: #fff;
-  margin-top: 50px;
+  margin-top: 40px;
+  padding: 0;
+  text-align: left;
 }
 
 .footer-container {
   width: 90%;
+  max-width: 1200px;
   margin: auto;
-  padding: 60px 0;
+  padding: 40px 0 28px;
+
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 40px;
+  grid-template-columns: 1.5fr 1fr 1fr 1.4fr;
+  gap: 30px;
 }
 
 .footer-section h2,
 .footer-section h3 {
-  margin-bottom: 20px;
+  margin: 0 0 14px;
+  color: #fff;
+}
+
+.footer-section h2 {
+  font-size: 22px;
+}
+
+.footer-section h3 {
+  font-size: 17px;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+/* small gold line under each heading */
+.footer-section h3::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 28px;
+  height: 2px;
+  background: #d4af37;
 }
 
 .footer-section p {
+  margin: 0 0 8px;
   color: #ccc;
-  line-height: 1.8;
+  font-size: 14px;
+  line-height: 1.6;
 }
 
 .footer-section ul {
   list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .footer-section ul li {
-  margin-bottom: 12px;
+  margin-bottom: 8px;
+  color: #ccc;
+  font-size: 14px;
 }
 
 .footer-section ul li a {
@@ -38,30 +76,125 @@
 }
 
 .footer-section ul li a:hover {
-  color: #fff;
+  color: #d4af37;
 }
 
+
+/* CONTACT ROWS: icon + text on one line */
+
+.footer-section p svg {
+  flex-shrink: 0;
+  color: #d4af37;
+  font-size: 15px;
+}
+
+.footer-section:last-child p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  word-break: break-word;
+}
+
+
+/* SOCIAL */
+
 .social-icons {
-  margin-top: 20px;
+  display: flex;
+  gap: 14px;
+  margin-top: 14px;
 }
 
 .social-icons a {
-  color: white;
-  font-size: 22px;
-  margin-right: 15px;
+  color: #fff;
+  font-size: 20px;
+  display: flex;
   transition: 0.3s;
 }
 
 .social-icons a:hover {
-  transform: translateY(-4px);
+  color: #d4af37;
+  transform: translateY(-3px);
 }
+
+
+/* BOTTOM BAR */
 
 .footer-bottom {
   text-align: center;
-  border-top: 1px solid #333;
-  padding: 20px 0;
+  border-top: 1px solid #2a2a2a;
+  padding: 14px 5%;
 }
 
 .footer-bottom p {
+  margin: 0;
   color: #aaa;
+  font-size: 13px;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+/* Tablet: 2 columns */
+@media (max-width: 900px) {
+
+  .footer-container {
+    grid-template-columns: 1fr 1fr;
+    gap: 26px 30px;
+    padding: 34px 0 22px;
+  }
+}
+
+
+/* Phone: compact. Brand + contact full width,
+   Quick Links and Services side by side */
+@media (max-width: 600px) {
+
+  .footer {
+    margin-top: 30px;
+  }
+
+  .footer-container {
+    width: 88%;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px 18px;
+    padding: 28px 0 18px;
+  }
+
+  .footer-section:first-child,
+  .footer-section:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .footer-section h2 {
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+
+  .footer-section h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+
+  .footer-section p,
+  .footer-section ul li {
+    font-size: 13px;
+  }
+
+  .footer-section ul li {
+    margin-bottom: 6px;
+  }
+
+  .social-icons {
+    margin-top: 10px;
+  }
+
+  .footer-bottom {
+    padding: 12px 5%;
+  }
+
+  .footer-bottom p {
+    font-size: 12px;
+  }
 }
