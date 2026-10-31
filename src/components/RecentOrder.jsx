@@ -1,4 +1,3 @@
-import React from "react";
 import "./RecentOrder.css";
 
 function RecentOrder({ orders }) {
@@ -16,13 +15,19 @@ function RecentOrder({ orders }) {
         </thead>
 
         <tbody>
-          {orders.map((order) => (
-            <tr key={order.id}>
-              <td>{order.id}</td>
-              <td>{order.customer}</td>
-              <td>{order.status}</td>
+          {orders.length ? (
+            orders.map((order) => (
+              <tr key={order.id}>
+                <td>{order.id}</td>
+                <td>{order.customer}</td>
+                <td>{order.status}</td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="3">No recent orders found.</td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>

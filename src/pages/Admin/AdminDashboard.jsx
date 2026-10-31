@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Sidebar from "../../components/Sidebar";
@@ -13,40 +13,35 @@ import { getAvailableSlots } from "../../Api/AppointmentApi";
 
 import "./AdminDashboard.css";
 
-const quickActions = [
-  { id: "new-order", label: "New Order", path: "/orders" },
-  { id: "book", label: "Appointments", path: "/appointments" },
-  { id: "measure", label: "Measurements", path: "/measurements" },
-  { id: "product", label: "Add Product", path: "/products" },
-  { id: "report", label: "View Reports", path: "/reports" },
-];
-
 const getArray = (response, key) => {
   const data = response?.data;
 
   if (Array.isArray(data)) return data;
   if (Array.isArray(data?.[key])) return data[key];
+  if (Array.isArray(data?.data?.[key])) return data.data[key];
   if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.result)) return data.result;
+  if (Array.isArray(data?.users) && key === "customers") return data.users;
 
-  return [];
+  return null;
 };
 
 const formatCurrency = (amount) =>
   `₹${Number(amount || 0).toLocaleString("en-IN")}`;
 
-const getOrderId = (order) =>
-  order.orderNumber || order.orderId || order._id || order.id;
+const getOrderId = (order) => order._id || order.id || order.orderId || "";
 
-const getCustomerName = (order) =>
-  order.customerName ||
-  order.customer?.name ||
-  order.customer?.fullName ||
-  order.customer ||
-  order.name ||
-  "Customer";
+const getCustomerName = (order) => {
+  const customer =
+    order.customer || order.customerId || order.customerName || order.name;
+  if (customer && typeof customer === "object") {
+    return customer.name || customer.fullName || customer.email || "Customer";
+  }
+  return customer || "Customer";
+};
 
-const getOrderPrice = (order) =>
-  Number(
+const getOrderPrice = (order) => {
+  const price = Number(
     order.totalAmount ??
       order.totalPrice ??
       order.amount ??
@@ -54,75 +49,128 @@ const getOrderPrice = (order) =>
       order.price ??
       0
   );
+  return Number.isFinite(price) ? price : 0;
+};
+
+const getToday = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const getErrorMessage = (error) =>
+  error?.response?.data?.message || error?.message || "Request failed.";
 
 function AdminDashboard() {
   const navigate = useNavigate();
 
   const [orders, setOrders] = useState([]);
   const [customers, setCustomers] = useState([]);
-  const [appointments, setAppointments] = useState([]);
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [loaded, setLoaded] = useState({
+    orders: false,
+    customers: false,
+    slots: false,
+  });
 
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState([]);
+  const [updatingOrderId, setUpdatingOrderId] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
 
     async function fetchDashboardData() {
       setLoading(true);
-      setError("");
-
-      const today = new Date().toLocaleDateString("en-CA");
+      setErrors([]);
+      setLoaded({ orders: false, customers: false, slots: false });
 
       const results = await Promise.allSettled([
         getOrders(),
         getCustomers(),
-        getAvailableSlots(today),
+        getAvailableSlots(getToday()),
       ]);
 
       if (!isMounted) return;
 
+      const requestErrors = [];
+
       if (results[0].status === "fulfilled") {
-        setOrders(
-          getArray(results[0].value, "orders").map((order) => ({
-            ...order,
-            id: String(getOrderId(order)),
-            customer: getCustomerName(order),
-            type:
-              order.type ||
-              order.orderType ||
-              order.service ||
-              "Tailoring",
-            status: order.status || "Pending",
-            price: getOrderPrice(order),
-            date: order.createdAt
-              ? new Date(order.createdAt).toLocaleDateString("en-IN")
-              : "—",
-            dueDate: order.dueDate
-              ? new Date(order.dueDate).toLocaleDateString("en-IN")
-              : "—",
-          }))
-        );
+        const orderList = getArray(results[0].value, "orders");
+        if (orderList) {
+          setOrders(
+            orderList.map((order, index) => {
+              const record = order || {};
+              return {
+                ...record,
+                apiId: getOrderId(record),
+                id: String(
+                  record.orderNumber ||
+                    record.orderId ||
+                    getOrderId(record) ||
+                    `Order ${index + 1}`
+                ),
+                customer: getCustomerName(record),
+                type:
+                  record.type ||
+                  record.orderType ||
+                  record.service ||
+                  "Tailoring",
+                status: record.status || "Pending",
+                price: getOrderPrice(record),
+                date: (record.createdAt || record.date)
+                  ? new Date(record.createdAt || record.date).toLocaleDateString(
+                      "en-IN"
+                    )
+                  : "—",
+                dueDate: record.dueDate
+                  ? new Date(record.dueDate).toLocaleDateString("en-IN")
+                  : "—",
+              };
+            })
+          );
+          setLoaded((current) => ({ ...current, orders: true }));
+        } else {
+          requestErrors.push("Orders: The API returned an unexpected response.");
+        }
+      } else {
+        requestErrors.push(`Orders: ${getErrorMessage(results[0].reason)}`);
       }
 
       if (results[1].status === "fulfilled") {
-        setCustomers(getArray(results[1].value, "customers"));
+        const customerList = getArray(results[1].value, "customers");
+        if (customerList) {
+          setCustomers(customerList);
+          setLoaded((current) => ({ ...current, customers: true }));
+        } else {
+          requestErrors.push(
+            "Customers: The API returned an unexpected response."
+          );
+        }
+      } else {
+        requestErrors.push(`Customers: ${getErrorMessage(results[1].reason)}`);
       }
 
       if (results[2].status === "fulfilled") {
-        setAppointments(
-          getArray(results[2].value, "appointments").length
-            ? getArray(results[2].value, "appointments")
-            : getArray(results[2].value, "slots")
+        const slotList = getArray(results[2].value, "slots");
+        if (slotList) {
+          setAvailableSlots(slotList);
+          setLoaded((current) => ({ ...current, slots: true }));
+        } else {
+          requestErrors.push(
+            "Today's availability: The API returned an unexpected response."
+          );
+        }
+      } else {
+        requestErrors.push(
+          `Today's availability: ${getErrorMessage(results[2].reason)}`
         );
       }
 
-      if (results.some((result) => result.status === "rejected")) {
-        setError(
-          "Some dashboard information could not be loaded. Please check your backend API."
-        );
-      }
-
+      setErrors(requestErrors);
       setLoading(false);
     }
 
@@ -131,27 +179,26 @@ function AdminDashboard() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [refreshKey]);
 
   const handleStatusChange = async (orderId, newStatus) => {
-    const previousOrders = orders;
-
-    setOrders((currentOrders) =>
-      currentOrders.map((order) =>
-        order.id === String(orderId)
-          ? { ...order, status: newStatus }
-          : order
-      )
-    );
-
+    setUpdatingOrderId(String(orderId));
+    setErrors([]);
     try {
       await updateOrder(orderId, { status: newStatus });
-    } catch (err) {
-      setOrders(previousOrders);
-      setError(
-        err?.response?.data?.message ||
-          "Failed to update order status. Please try again."
+      setOrders((currentOrders) =>
+        currentOrders.map((order) =>
+          String(order.apiId || order.id) === String(orderId)
+            ? { ...order, status: newStatus }
+            : order
+        )
       );
+    } catch (err) {
+      setErrors([
+        `Order status: ${getErrorMessage(err)}`,
+      ]);
+    } finally {
+      setUpdatingOrderId("");
     }
   };
 
@@ -165,34 +212,74 @@ function AdminDashboard() {
     .filter((order) => order.status !== "Cancelled")
     .reduce((sum, order) => sum + order.price, 0);
 
+  const orderStatusSummary = [
+    {
+      label: "Pending",
+      className: "pending",
+      count: orders.filter((order) => order.status === "Pending").length,
+    },
+    {
+      label: "In progress",
+      className: "in-progress",
+      count: orders.filter((order) =>
+        ["In Progress", "Stitching", "Cutting", "Ready for trial"].includes(
+          order.status
+        )
+      ).length,
+    },
+    {
+      label: "Completed",
+      className: "completed",
+      count: orders.filter((order) =>
+        ["Completed", "Complete", "Delivered"].includes(order.status)
+      ).length,
+    },
+    {
+      label: "Cancelled",
+      className: "cancelled",
+      count: orders.filter((order) => order.status === "Cancelled").length,
+    },
+  ];
+  const largestStatusCount = Math.max(
+    1,
+    ...orderStatusSummary.map((status) => status.count)
+  );
+
   const stats = [
     {
       id: "orders",
       title: "Total Orders",
-      value: orders.length,
+      value: loaded.orders ? orders.length : "—",
     },
     {
       id: "pending",
-      title: "Orders in Progress",
-      value: pendingOrders,
+      title: "Open Orders",
+      value: loaded.orders ? pendingOrders : "—",
     },
     {
       id: "customers",
       title: "Total Customers",
-      value: customers.length,
+      value: loaded.customers ? customers.length : "—",
     },
     {
       id: "revenue",
-      title: "Total Order Value",
-      value: formatCurrency(totalOrderValue),
+      title: "Order Value (excl. cancelled)",
+      value: loaded.orders ? formatCurrency(totalOrderValue) : "—",
     },
   ];
 
-  const recentOrders = [...orders].slice(-5).reverse().map((order) => ({
-    id: order.id,
-    customer: order.customer,
-    status: order.status,
-  }));
+  const recentOrders = [...orders]
+    .sort((first, second) => {
+      const firstDate = new Date(first.createdAt || first.date || 0).getTime();
+      const secondDate = new Date(second.createdAt || second.date || 0).getTime();
+      return secondDate - firstDate;
+    })
+    .slice(0, 5)
+    .map((order) => ({
+      id: order.id,
+      customer: order.customer,
+      status: order.status,
+    }));
 
   return (
     <div className="admin-layout">
@@ -207,18 +294,31 @@ function AdminDashboard() {
             </p>
           </div>
 
-          <button
-            type="button"
-            className="admin-primary-btn"
-            onClick={() => navigate("/orders")}
-          >
-            + New Order
-          </button>
+          <div className="admin-header-actions">
+            <button
+              type="button"
+              className="admin-secondary-btn"
+              onClick={() => setRefreshKey((key) => key + 1)}
+              disabled={loading}
+            >
+              {loading ? "Refreshing..." : "Refresh"}
+            </button>
+            <button
+              type="button"
+              className="admin-primary-btn"
+              onClick={() => navigate("/admin/customers")}
+            >
+              Manage Customers
+            </button>
+          </div>
         </header>
 
-        {error && (
+        {errors.length > 0 && (
           <div className="dashboard-error" role="alert">
-            {error}
+            <strong>Some dashboard data could not be loaded.</strong>
+            <ul>
+              {errors.map((message) => <li key={message}>{message}</li>)}
+            </ul>
           </div>
         )}
 
@@ -240,56 +340,41 @@ function AdminDashboard() {
               <div className="admin-panel admin-panel--wide">
                 <RecentOrder orders={recentOrders} />
 
-                <button
-                  type="button"
-                  className="admin-link-btn"
-                  onClick={() => navigate("/orders")}
-                >
-                  See All Orders →
-                </button>
               </div>
 
               <div className="admin-panel">
-                <h2>Today's Appointments</h2>
+                <h2>Today's Available Fitting Slots</h2>
 
-                {appointments.length ? (
+                {loaded.slots && availableSlots.length ? (
                   <ul className="appt-list">
-                    {appointments.slice(0, 5).map((appointment, index) => (
-                      <li key={appointment._id || appointment.id || index}>
-                        <span className="appt-time">
-                          {appointment.time ||
-                            appointment.slot ||
-                            appointment.startTime ||
-                            "Time not set"}
-                        </span>
-
-                        <span className="appt-info">
-                          <strong>
-                            {appointment.customerName ||
-                              appointment.customer?.name ||
-                              appointment.name ||
-                              "Available slot"}
-                          </strong>
-                          <small>
-                            {appointment.type ||
-                              appointment.service ||
-                              appointment.status ||
-                              "Appointment"}
-                          </small>
-                        </span>
-                      </li>
-                    ))}
+                    {availableSlots.slice(0, 5).map((slot, index) => {
+                      const time =
+                        typeof slot === "string"
+                          ? slot
+                          : slot.time || slot.startTime || slot.slot || "Fitting slot";
+                      return (
+                        <li key={slot._id || slot.id || `${time}-${index}`}>
+                          <span className="appt-time">{time}</span>
+                          <span className="appt-info">
+                            <strong>Available</strong>
+                            <small>Fitting appointment</small>
+                          </span>
+                        </li>
+                      );
+                    })}
                   </ul>
+                ) : loaded.slots ? (
+                  <p>No fitting slots available today.</p>
                 ) : (
-                  <p>No appointment records found.</p>
+                  <p>Availability could not be loaded.</p>
                 )}
 
                 <button
                   type="button"
                   className="admin-link-btn"
-                  onClick={() => navigate("/appointments")}
+                  onClick={() => setRefreshKey((key) => key + 1)}
                 >
-                  Open Appointments →
+                  Refresh availability →
                 </button>
               </div>
             </section>
@@ -301,25 +386,43 @@ function AdminDashboard() {
                 <OrdersTable
                   orders={orders}
                   onStatusChange={handleStatusChange}
+                  updatingOrderId={updatingOrderId}
+                  emptyStateText={
+                    loaded.orders
+                      ? "No orders found."
+                      : "Orders could not be loaded."
+                  }
                   compact
                 />
               </div>
 
               <div className="admin-panel">
-                <h2>Quick Actions</h2>
-
-                <div className="quick-actions">
-                  {quickActions.map((action) => (
-                    <button
-                      type="button"
-                      key={action.id}
-                      className="quick-action-btn"
-                      onClick={() => navigate(action.path)}
-                    >
-                      {action.label} →
-                    </button>
-                  ))}
-                </div>
+                <h2>Order Status</h2>
+                {loaded.orders ? (
+                  <ul className="order-status-list">
+                    {orderStatusSummary.map((status) => (
+                      <li key={status.label}>
+                        <div className="order-status-label">
+                          <span>{status.label}</span>
+                          <strong>{status.count}</strong>
+                        </div>
+                        <div
+                          className="order-status-track"
+                          aria-label={`${status.count} ${status.label} orders`}
+                        >
+                          <span
+                            className={`order-status-bar ${status.className}`}
+                            style={{
+                              width: `${(status.count / largestStatusCount) * 100}%`,
+                            }}
+                          />
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>Order status summary is unavailable.</p>
+                )}
               </div>
             </section>
           </>

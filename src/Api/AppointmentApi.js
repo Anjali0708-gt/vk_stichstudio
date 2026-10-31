@@ -1,5 +1,8 @@
 import API from "./axios";
 
+export const getAppointments = () =>
+  API.get("/appointments");
+
 // export const getAvailableSlots = () =>
 //   API.get("/appointments/slots");
 

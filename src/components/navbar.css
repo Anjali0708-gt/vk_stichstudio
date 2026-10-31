@@ -767,3 +767,38 @@ footer p{
         font-size: 2.4rem;
     }
 }
+/* Search bar: shown under the logo row on tablets and phones */
+.search-mobile { display: none; }
+.search-desktop { display: contents; }
+
+@media (max-width: 1200px) {
+  .navbar {
+    height: auto;
+    min-height: 70px;
+    flex-wrap: wrap;
+    row-gap: 10px;
+    padding: 10px 20px 12px;
+  }
+
+  .navbar-brand { order: 1; margin-right: auto; }
+  .logo { order: 1; margin-right: auto; }
+  .menu-toggle { order: 2; }
+
+  .search-desktop { display: none; }
+
+  .search-mobile {
+    display: block;
+    order: 3;
+    flex: 0 0 100%;
+  }
+
+  .search-mobile .search-form {
+    width: 100%;
+    max-width: none;
+    flex: none;
+  }
+}
+
+@media (max-width: 400px) {
+  .navbar { padding: 10px 14px 12px; }
+}

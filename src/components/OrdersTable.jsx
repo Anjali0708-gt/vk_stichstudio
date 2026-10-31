@@ -1,7 +1,15 @@
-export default function OrdersTable({ orders, onStatusChange, compact = false }) {
+export default function OrdersTable({
+  orders,
+  onStatusChange,
+  updatingOrderId = "",
+  emptyStateText = "No orders found",
+  compact = false,
+}) {
   const statusClass = (status) => {
     const map = {
       'Completed': 'completed',
+      'Complete': 'completed',
+      'Delivered': 'completed',
       'Pending': 'pending',
       'In Progress': 'in-progress',
       'Cancelled': 'cancelled',
@@ -12,7 +20,7 @@ export default function OrdersTable({ orders, onStatusChange, compact = false })
   const statusOptions = ['Pending', 'In Progress', 'Completed', 'Cancelled'];
 
   const formatPrice = (price) => {
-    return '₹' + price.toLocaleString('en-IN');
+    return '₹' + Number(price || 0).toLocaleString('en-IN');
   };
 
   return (
@@ -36,8 +44,7 @@ export default function OrdersTable({ orders, onStatusChange, compact = false })
               <td colSpan={compact ? 5 : 8} style={{ textAlign: 'center', padding: '32px' }}>
                 <div className="dash-empty-state">
                   <div className="empty-icon">📋</div>
-                  <h3>No orders found</h3>
-                  <p>Try adjusting your filters</p>
+                  <h3>{emptyStateText}</h3>
                 </div>
               </td>
             </tr>
@@ -63,8 +70,18 @@ export default function OrdersTable({ orders, onStatusChange, compact = false })
                     <select
                       className="dash-select"
                       value={order.status}
-                      onChange={(e) => onStatusChange(order.id, e.target.value)}
+                      onChange={(e) =>
+                        onStatusChange(order.apiId || order.id, e.target.value)
+                      }
+                      disabled={
+                        String(updatingOrderId) === String(order.apiId || order.id) ||
+                        !order.apiId
+                      }
+                      aria-label={`Update status for order ${order.id}`}
                     >
+                      {!statusOptions.includes(order.status) && (
+                        <option value={order.status}>{order.status}</option>
+                      )}
                       {statusOptions.map((s) => (
                         <option key={s} value={s}>{s}</option>
                       ))}

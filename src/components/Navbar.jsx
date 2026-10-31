@@ -24,6 +24,22 @@ function Navbar() {
 
   const linkClass = ({ isActive }) => (isActive ? 'nav-item active' : 'nav-item');
 
+  // One search form, shown in two places:
+  // - under the logo row on tablets and phones (always visible)
+  // - inside the menu on desktop
+  const searchForm = (
+    <form onSubmit={handleSearch} className="search-form">
+      <input
+        type="search"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="Search suits, shirts, sherwanis..."
+        aria-label="Search products"
+      />
+      <button type="submit" aria-label="Search"><FaSearch /></button>
+    </form>
+  );
+
   return (
     <nav className="navbar">
       <div className="logo">
@@ -42,6 +58,9 @@ function Navbar() {
         {menuOpen ? <FaTimes /> : <FaBars />}
       </button>
 
+      {/* Tablets and phones: always visible, outside the hamburger menu */}
+      <div className="search-mobile">{searchForm}</div>
+
       <div className={`nav-menu ${menuOpen ? 'open' : ''}`}>
         <div className="nav-links">
           <NavLink to="/" className={linkClass} onClick={closeMenu}>Home</NavLink>
@@ -51,16 +70,8 @@ function Navbar() {
           <NavLink to="/contact" className={linkClass} onClick={closeMenu}>Contact</NavLink>
         </div>
 
-        <form onSubmit={handleSearch} className="search-form">
-          <input
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search suits, shirts, sherwanis..."
-            aria-label="Search products"
-          />
-          <button type="submit" aria-label="Search"><FaSearch /></button>
-        </form>
+        {/* Desktop only */}
+        <div className="search-desktop">{searchForm}</div>
 
         <div className="user-section">
           <Link to="/bookappointment" className="nav-book-btn" onClick={closeMenu}>

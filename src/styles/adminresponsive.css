@@ -1,0 +1,138 @@
+/* Admin layout responsive styles.
+   Loaded after dashboard.css so it wins over the older sidebar and top bar rules. */
+:root { --sb-width: 220px; }
+
+/* ---------- Layout (desktop) ---------- */
+.admin-layout.admin-layout {
+  display: block !important;
+  min-height: 100vh;
+}
+
+.admin-layout.admin-layout > .sidebar {
+  position: fixed !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: var(--sb-width) !important;
+  min-width: var(--sb-width) !important;
+  height: 100vh !important;
+  min-height: 100vh !important;
+  padding: 20px 12px !important;
+  overflow-x: hidden;
+  overflow-y: auto;
+  z-index: 1100;
+  transform: none;
+  transition: transform 0.25s ease;
+}
+
+.admin-layout.admin-layout .sidebar-menu {
+  flex-direction: column !important;
+  overflow-x: visible !important;
+}
+.admin-layout.admin-layout .sidebar-menu li { width: 100% !important; }
+.admin-layout.admin-layout .sidebar-menu svg {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.admin-layout.admin-layout > .dash-main {
+  margin-left: var(--sb-width) !important;
+  width: auto !important;
+  max-width: none !important;
+  min-width: 0;
+  min-height: 100vh;
+  padding: 0 !important;
+}
+
+.admin-layout.admin-layout .dash-topbar {
+  position: sticky !important;
+  top: 0;
+  left: auto !important;
+  right: auto !important;
+  width: auto !important;
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 64px;
+  padding: 0 24px;
+}
+.admin-layout .dash-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.admin-layout.admin-layout .dash-content {
+  width: 100%;
+  min-width: 0;
+  padding: 28px 28px 40px !important;
+}
+
+/* Remove the old extra offset on the page rendered inside the layout */
+.admin-layout .dash-content .admin-main {
+  margin: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+}
+
+/* Wide tables scroll inside their card, not the whole page */
+.admin-layout .dash-content .recent-orders { overflow-x: auto; }
+.admin-layout .dash-content .recent-orders table { min-width: 460px; }
+.admin-layout .dash-content img { max-width: 100%; }
+
+/* Hamburger and backdrop are hidden on desktop */
+.admin-layout .dash-sidebar-toggle { display: none !important; }
+.admin-layout .dash-backdrop { display: none; }
+
+/* ---------- Tablet and phone ---------- */
+@media (max-width: 860px) {
+  .admin-layout.admin-layout > .sidebar {
+    width: 240px !important;
+    min-width: 240px !important;
+    transform: translateX(-100%);
+  }
+  .admin-layout.sidebar-open > .sidebar {
+    transform: none;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.4);
+  }
+  .admin-layout.sidebar-open .dash-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1050;
+  }
+
+  .admin-layout.admin-layout > .dash-main { margin-left: 0 !important; }
+
+  .admin-layout .dash-sidebar-toggle {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    position: static !important;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  .admin-layout.admin-layout .dash-topbar { padding: 0 12px; }
+  .admin-layout .dash-topbar-title { font-size: 18px; }
+  .admin-layout.admin-layout .dash-content { padding: 20px 16px 32px !important; }
+  .admin-layout .dash-content .admin-header-actions { flex-wrap: wrap; }
+}
+
+@media (max-width: 600px) {
+  .admin-layout .dash-topbar-search { display: none !important; }
+}

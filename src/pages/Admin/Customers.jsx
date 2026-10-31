@@ -1,18 +1,28 @@
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   getCustomers,
   signUp,
   updateCustomer,
   deleteCustomer,
 } from "../../Api/UserApi";
+import Sidebar from "../../components/Sidebar";
 import "./Customer.css";
+import "./AdminDashboard.css";
 
 const emptyForm = {
   name: "",
   email: "",
   phone: "",
   address: "",
+};
+
+const getCustomerList = (response) => {
+  const data = response?.data;
+  const list = Array.isArray(data)
+    ? data
+    : data?.customers || data?.data || data?.users || [];
+  return Array.isArray(list) ? list : [];
 };
 
 export default function Customers() {
@@ -33,13 +43,7 @@ export default function Customers() {
       setError("");
 
       const response = await getCustomers();
-      const data = response.data;
-
-      const list = Array.isArray(data)
-        ? data
-        : data.customers || data.data || [];
-
-      setCustomers(Array.isArray(list) ? list : []);
+      setCustomers(getCustomerList(response));
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -51,7 +55,27 @@ export default function Customers() {
   };
 
   useEffect(() => {
-    fetchCustomers();
+    let isMounted = true;
+
+    getCustomers()
+      .then((response) => {
+        if (isMounted) setCustomers(getCustomerList(response));
+      })
+      .catch((err) => {
+        if (isMounted) {
+          setError(
+            err.response?.data?.message ||
+              "Unable to load customers. Please try again."
+          );
+        }
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Open add form
@@ -168,7 +192,11 @@ export default function Customers() {
   });
 
   return (
-    <div className="customers-page">
+    
+    <div className="admin-layout">
+      <Sidebar />
+      <main className="admin-main">
+        <div className="customers-page">
       {/* Header */}
       <header className="customers-header">
         <div>
@@ -468,6 +496,8 @@ export default function Customers() {
           </section>
         </div>
       )}
+        </div>
+      </main>
     </div>
   );
 }
